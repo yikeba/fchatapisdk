@@ -4,7 +4,7 @@ import 'package:fchatapi/webapi/HttpWebApi.dart';
 
 class FChatApiSdk {
   static FileObj fileobj = FileObj();
-
+  static FileArrObj filearrobj=FileArrObj();
   static init(String userid, String token, void Function(bool state) webcall,
       void Function(bool state) appcall) {
     UserObj.token = token;

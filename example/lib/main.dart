@@ -95,8 +95,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> readmd() async {
-    FChatApiSdk.fileobj.readMD((value) {
-      print("读取文件目录返回$value");
+    FChatApiSdk.filearrobj.readMD((value) {
+      print("读取文件目录返回文件对象数量:${value.length}");
     });
   }
 

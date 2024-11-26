@@ -7,7 +7,7 @@ import 'package:fchatapi/webapi/HttpWebApi.dart';
 import 'package:http_parser/http_parser.dart';
 import 'dart:convert'; // 用于编码
 import 'dart:typed_data';
-
+import 'package:path/path.dart' as pathobj;
 import '../util/JsonUtil.dart';
 import '../util/UserObj.dart';
 import 'WebCommand.dart'; // 用于二进制处理
@@ -138,6 +138,43 @@ class FileObj {
     }
   }
 
+  Map<String,dynamic> _getreadMap(path){
+    Map<String,dynamic> map = {};
+    map.putIfAbsent("userid", () => UserObj.userid);
+    map.putIfAbsent("command", () => WebCommand.readfile);
+    map.putIfAbsent("sapppath", ()=> path);
+    return map;
+  }
+  Future<void> readFile(String path,void Function(bool state) upstate) async {
+
+    try {
+      Map<String,dynamic> map=_getreadMap(path);
+      FormData formData = FormData.fromMap(map);
+      // 发送 POST 请求
+      String url = HttpWebApi.geturl();
+      Response response = await _dio.post(
+        url,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            "Authorization": authHeader
+          },
+        ),
+      );
+      // 检查上传结果
+      if (response.statusCode == 200) {
+        upstate(true);
+        print("文件读取成功: ${response.data}");
+      } else {
+        print("文件上传失败: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("上传过程中出现错误: $e");
+    }
+  }
+
+
 
 }
 
@@ -173,8 +210,8 @@ class FileArrObj{
       // 检查上传结果
       if (response.statusCode == 200) {
         String rec=response.data;
-        parsefileobj(RecObj(rec).json);
-        print("读取内容: $rec");
+        filearr(parsefileobj(RecObj(rec).json));
+        //print("读取内容: $rec");
       } else {
         print("文件上传失败: ${response.statusCode}");
       }
@@ -183,11 +220,16 @@ class FileArrObj{
     }
   }
 
-  parsefileobj(Map map){
+  List<FileObj> parsefileobj(Map map){
+    List<FileObj> arr=[];
     map.forEach((key, value) {
-
-
+         FileObj file=FileObj();
+         String fileName = pathobj.basename(key);
+         file.md5Hash=fileName;
+         file.filedata=value;
+         arr.add(file);
     });
+    return arr;
   }
 
 
