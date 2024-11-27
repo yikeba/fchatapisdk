@@ -145,42 +145,41 @@ class FileObj {
     map.putIfAbsent("sapppath", ()=> path);
     return map;
   }
-  Future<void> readFile(String path,void Function(bool state) upstate) async {
 
+  Future<void> readFile(String path,void Function(String data) filedata) async {
     try {
       Map<String,dynamic> map=_getreadMap(path);
-      FormData formData = FormData.fromMap(map);
-      // 发送 POST 请求
-      String url = HttpWebApi.geturl();
-      Response response = await _dio.post(
-        url,
-        data: formData,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            "Authorization": authHeader
-          },
-        ),
-      );
-      // 检查上传结果
-      if (response.statusCode == 200) {
-        upstate(true);
-        print("文件读取成功: ${response.data}");
-      } else {
-        print("文件上传失败: ${response.statusCode}");
-      }
+      String rec=await HttpWebApi.httpspost(map);
+      String data=RecObj(rec).data;
+      filedata(data);
+    } catch (e) {
+      print("上传过程中出现错误: $e");
+    }
+  }
+
+  Map<String,dynamic> _getdelMap(path){
+    Map<String,dynamic> map = {};
+    map.putIfAbsent("userid", () => UserObj.userid);
+    map.putIfAbsent("command", () => WebCommand.delfile);
+    map.putIfAbsent("sapppath", ()=> path);
+    return map;
+  }
+
+  Future<void> delFile(String path,void Function(bool state) call) async {
+    try {
+      Map<String,dynamic> map=_getdelMap(path);
+      String rec=await HttpWebApi.httpspost(map);
+      String data=RecObj(rec).data;
+      call(true);
     } catch (e) {
       print("上传过程中出现错误: $e");
     }
   }
 
 
-
 }
 
 class FileArrObj{
-  final Dio _dio = Dio();
-  String authHeader = 'Bearer ${UserObj.servertoken}'; // 设置 Bearer Token
 
   Map<String,dynamic> _getReadmdMap(String md){
     Map<String,dynamic> map = {};
@@ -190,36 +189,28 @@ class FileArrObj{
     return map;
   }
 
-  Future<void> readMD(void Function(List<FileObj>) filearr,{String md=""}) async {
-    try {
-      if(md.isEmpty) md=FileMD.base.name;
-      Map<String,dynamic> map=_getReadmdMap(md);
-      FormData formData = FormData.fromMap(map);
-      // 发送 POST 请求
-      String url = HttpWebApi.geturl();
-      Response response = await _dio.post(
-        url,
-        data: formData,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            "Authorization": authHeader
-          },
-        ),
-      );
-      // 检查上传结果
-      if (response.statusCode == 200) {
-        String rec=response.data;
-        filearr(parsefileobj(RecObj(rec).json));
-        //print("读取内容: $rec");
-      } else {
-        print("文件上传失败: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("上传过程中出现错误: $e");
-    }
+  Map<String,dynamic> _getReadmdthbMap(String md){
+    Map<String,dynamic> map = {};
+    map.putIfAbsent("userid", () => UserObj.userid);
+    map.putIfAbsent("command", () => WebCommand.readMDthb);
+    map.putIfAbsent("sapppath", ()=> md);
+    return map;
   }
 
+  Future<void> readMD(void Function(List<FileObj>) filearr,{String md=""}) async {
+      if(md.isEmpty) md=FileMD.base.name;
+      Map<String,dynamic> map=_getReadmdMap(md);
+      String rec=await HttpWebApi.httpspost(map);
+      filearr(parsefileobj(RecObj(rec).json));
+  }
+
+  Future<void> readMDthb(void Function(List) filearr,{String md=""}) async {
+      if(md.isEmpty) md=FileMD.base.name;
+      Map<String,dynamic> map=_getReadmdthbMap(md);
+      String rec=await HttpWebApi.httpspost(map);
+      filearr(RecObj(rec).listarr);
+
+  }
   List<FileObj> parsefileobj(Map map){
     List<FileObj> arr=[];
     map.forEach((key, value) {
@@ -231,7 +222,6 @@ class FileArrObj{
     });
     return arr;
   }
-
 
 }
 

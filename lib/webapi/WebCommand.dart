@@ -1,8 +1,4 @@
 
-
-
-
-
 class WebCommand{
   static final String sapplogin="sapplogin";
   static final String readfile="readfile";  //读取ui即产品数据
@@ -13,6 +9,6 @@ class WebCommand{
   static final String readMDthb="readMDthb";   //读取目录文件名称和路径
   static final String readGroup="readGroup";  //读取客服群聊信息
   static final String sendMsg="sendMsg";  //通过服务器群发消息给客户
-
+  static final String delfile="delfile";  //删除指定文件
 
 }

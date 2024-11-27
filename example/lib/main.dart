@@ -4,62 +4,47 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
-import 'package:fchatapi/fchatapi.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 
-Future<void> main() async {
+void main() async {
   await dotenv.load();
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MyHomePage(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  final _fchatapiPlugin = Fchatapi();
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
 
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
     initload();
   }
 
+  String userid="";
+  String token = "";
   initload() {
-    String userid = dotenv.get('userid');
-    String token = dotenv.get('token');
+    userid = dotenv.get('userid');
+    token = dotenv.get('token');
     FChatApiSdk.init(userid, token, (webstate) {
       print("fchat web api 返回状态$webstate");
     }, (appstate) {});
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion = await _fchatapiPlugin.getPlatformVersion() ??
-          'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   String? selectedFileName;
@@ -67,26 +52,24 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> pickFile() async {
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.any, // 允许选择任意类型的文件
-      allowMultiple: false, // 只允许选择单个文件
+      type: FileType.any,
+      allowMultiple: false,
     );
 
     if (result != null && result.files.isNotEmpty) {
       setState(() {
         selectedFileName = result.files.first.name;
-        selectedFilePath = result.files.first.path; // 在 Web 上为 null
+        selectedFilePath = result.files.first.path;
       });
 
-      // Web 平台特定：获取文件内容
       if (kIsWeb) {
-        final fileBytes = result.files.first.bytes; // 获取文件的二进制内容
-        print(' 本地 File Name: $selectedFileName');
-        print('本地  File Size: ${fileBytes?.length} bytes');
+        final fileBytes = result.files.first.bytes;
+        print('本地 File Name: $selectedFileName');
+        print('本地 File Size: ${fileBytes?.length} bytes');
       } else {
         print('File Path: $selectedFilePath');
       }
     } else {
-      // 用户取消了文件选择
       setState(() {
         selectedFileName = null;
         selectedFilePath = null;
@@ -97,21 +80,77 @@ class _MyAppState extends State<MyApp> {
   Future<void> readmd() async {
     FChatApiSdk.filearrobj.readMD((value) {
       print("读取文件目录返回文件对象数量:${value.length}");
-    });
+    }, md: "assetsmd");
+  }
+
+  Future<void> delfile() async {
+    FChatApiSdk.filearrobj.readMDthb((value) {
+      for (String str in value) {
+        String name=str.replaceAll("$userid/", "");
+        print("删除指定文件名称路径:$name");
+        FChatApiSdk.fileobj.delFile(name, (data) {
+          print("指定文件删除完毕$name,状态$data");
+        });
+        break;
+      }
+    }, md: "assetsmd");
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+  }
+
+  Future<void> readmdthb() async {
+    int index = 0;
+    int endindex = 0;
+    _showLoadingDialog();
+    FChatApiSdk.filearrobj.readMDthb((value) {
+      for (String str in value) {
+        index++;
+        //print("读取服务器原始路径:$str");
+        String name=str.replaceAll("$userid/", "");
+        //print("读取文件明显名称:$name");
+        FChatApiSdk.fileobj.readFile(name, (data) {
+          print("读取指定文件内容:${data}");
+          endindex++;
+          if (endindex == index) {
+            Navigator.of(context).pop();
+          }
+        });
+      }
+    }, md: "assetsmd");
+  }
+
+  Future<void> readmdthbinfo() async {
+    _showLoadingDialog();
+    FChatApiSdk.filearrobj.readMDthb((value) {
+      for (String str in value) {
+        String name=str.replaceAll("$userid/", "");
+        print("读取文件明显名称:$name");
+      }
+      Navigator.of(context).pop();
+    }, md: "assetsmd");
   }
 
   Future<void> pickImage() async {
     try {
-      // 使用 image_picker_web 选择图片
       final pickedImage = await ImagePickerWeb.getImageAsFile();
 
-      String? _fileName; // 存储文件名
+      String? _fileName;
       if (pickedImage != null) {
         FChatApiSdk.fileobj.writeFile(pickedImage, (value) {
           print("File 上传访问状态: $value");
         });
         setState(() {
-          _fileName = pickedImage.name ?? "Unknown File";
+          _fileName = pickedImage.name;
         });
         print("File Name: $_fileName");
         print("Image Size: ${pickedImage.size} bytes");
@@ -125,13 +164,13 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: const Text('FChat Api'),
       ),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
               onPressed: pickFile,
@@ -142,14 +181,24 @@ class _MyAppState extends State<MyApp> {
               child: const Text("选择图片文件"),
             ),
             ElevatedButton(
-              onPressed: (){
-                readmd();
-              },
+              onPressed: readmd,
               child: const Text("读取文件目录"),
+            ),
+            ElevatedButton(
+              onPressed: readmdthb,
+              child: const Text("读取文件列表"),
+            ),
+            ElevatedButton(
+              onPressed: readmdthbinfo,
+              child: const Text("读取文件列表信息"),
+            ),
+            ElevatedButton(
+              onPressed: delfile,
+              child: const Text("删除文件"),
             ),
           ],
         ),
       ),
-    ));
+    );
   }
 }
