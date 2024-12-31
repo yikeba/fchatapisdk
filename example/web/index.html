@@ -1,19 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
@@ -31,6 +19,27 @@
 
   <title>fchatapi_example</title>
   <link rel="manifest" href="manifest.json">
+  <script>
+    function sendtoFChat(message) {
+      if (window.flutter_inappwebview) {
+        window.flutter_inappwebview.callHandler("FChatAPI", message).then((response) => {
+          flutterAppResponseHandler(response)
+        });
+      } else {
+        console.error("flutter_inappwebview is not available!");
+      }
+    }
+
+   function flutterAppResponseHandler(response) {
+     window.postMessage({
+      type: "flutterResponse",
+      data: response,
+     },
+     "*"
+     );
+ }
+
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

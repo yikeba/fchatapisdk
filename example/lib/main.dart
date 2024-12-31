@@ -1,4 +1,5 @@
 import 'package:fchatapi/FChatApiSdk.dart';
+import 'package:fchatapi/appapi/BaseJS.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,10 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
-    initload();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initload();
+    });
+
   }
 
   initload() {
@@ -100,6 +104,10 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  paytest(){
+    BaseJS.sendtoFChat("test send api msg");
+  }
+
   Future<void> pickImage() async {
     try {
       // 使用 image_picker_web 选择图片
@@ -146,6 +154,12 @@ class _MyAppState extends State<MyApp> {
                 readmd();
               },
               child: const Text("读取文件目录"),
+            ),
+            ElevatedButton(
+              onPressed: (){
+                paytest();
+              },
+              child: const Text("支付测试"),
             ),
           ],
         ),
