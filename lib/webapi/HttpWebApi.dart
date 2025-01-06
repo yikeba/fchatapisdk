@@ -130,15 +130,46 @@ class HttpWebApi {
     map.putIfAbsent("data", () => basedata);
     return JsonUtil.maptostr(map);
   }
+
+  static Future<String> httpspost(Map<String,dynamic> map) async {
+    try {
+      final Dio _dio = Dio();
+      String authHeader = 'Bearer ${UserObj.servertoken}'; // 设置 Bearer Token
+      FormData formData = FormData.fromMap(map);
+      // 发送 POST 请求
+      String url = HttpWebApi.geturl();
+      Response response = await _dio.post(
+        url,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            "Authorization": authHeader
+          },
+        ),
+      );
+      // 检查上传结果
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        print("文件上传失败: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("上传过程中出现错误: $e");
+    }
+    return "err";
+  }
 }
 
 
 class RecObj{
   int code=-1;
   Map json={};
+  List listarr=[];
   String data="";
   String rec;
   bool state=false;
+  Uint8List? databyte;
   RecObj(this.rec){
     initjson();
   }
@@ -153,10 +184,14 @@ class RecObj{
     if(code==200){
       if(recservermap.containsKey("token")){
         UserObj.servertoken=recservermap["token"];
+        //PhoneUtil.applog("获得服务器token:${UserObj.servertoken}");
       }
+      //print("读取服务器返回对象$rec");
       state=true;
       data=recservermap["data"];
       json=JsonUtil.strtoMap(data);
+      listarr=JsonUtil.strotList(data);
+      databyte=Uint8List.fromList(json.toString().codeUnits);
     }else{
       data="err";
     }

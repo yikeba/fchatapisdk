@@ -13,7 +13,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="fchatapi_example">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
+  <script type="text/javascript" src="https://cdn.bootcss.com/eruda/1.2.6/eruda.min.js"></script>
+  <script>eruda.init();</script>
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
@@ -26,7 +27,7 @@
           flutterAppResponseHandler(response)
         });
       } else {
-        console.error("flutter_inappwebview is not available!");
+        flutterAppResponseHandler("err")
       }
     }
 
@@ -37,6 +38,11 @@
      },
      "*"
      );
+
+   function onAppCallback(result) {
+      console.log("FChat Received data from app:", result);
+
+   }
  }
 
   </script>

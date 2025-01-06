@@ -143,6 +143,11 @@ class SignUtil{
     });
   }
 
+  static bool verifysha512(String data, String token,String sgin) {
+    String shasgin=hmacSHA512(data,token);
+    return sgin==shasgin;
+  }
+
   /// 验证文件的 MD5 是否一致
   static Future<bool> verifyMd5(Uint8List fileBytes, String expectedMd5) async {
     Digest md5Hash = md5.convert(fileBytes);  // 计算传入数据的 MD5

@@ -428,9 +428,8 @@ class JsonUtil {
       return jsonstr;
     }
   }
-  static Uint8List? getbase64Uint8list(String? jsonstr){
+  static Uint8List? getbase64Uint8list(String jsonstr){
     try {
-      if(jsonstr==null) return null;
       List<int> bytes = base64Decode(jsonstr).toList();
       return Uint8List.fromList(bytes);
     }catch(e){
@@ -438,14 +437,18 @@ class JsonUtil {
     }
   }
 
+  static Uint8List stringToBase64Uint8List(String input) {
+    String base64String = base64Encode(utf8.encode(input));
+    return Uint8List.fromList(utf8.encode(base64String));
+  }
 
-  static setbase64Uint8list(Uint8List? bytes){
+  static String setbase64Uint8list(Uint8List? bytes){
     try {
       List<int> stringBytes =bytes!.toList();
       String datastr = base64.encode(stringBytes);
       return datastr;
     }catch(e){
-      return null;
+      return "";
     }
   }
 
