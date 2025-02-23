@@ -18,6 +18,14 @@ class Tools {
     sleep(Duration(milliseconds: w));
   }
 
+  static Color generateRandomDarkColor() {
+    Random random = Random();
+    int r = random.nextInt(156); // 限制最大值 155
+    int g = random.nextInt(156);
+    int b = random.nextInt(156);
+    return Color.fromRGBO(r, g, b, 1); // 生成深色
+  }
+
   static Color generateRandomColor() {
     Random random = Random();
     int r, g, b;

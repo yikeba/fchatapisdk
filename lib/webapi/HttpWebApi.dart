@@ -61,7 +61,7 @@ class HttpWebApi {
   }
 
   static Map<String, dynamic> _logindata() {
-    Map<String, dynamic> map = HashMap();
+    Map<String, dynamic> map = {};
     map.putIfAbsent("userid", () => UserObj.userid);
     map.putIfAbsent("command", () => WebCommand.sapplogin);
     String data = Tools.generateRandomString(75);

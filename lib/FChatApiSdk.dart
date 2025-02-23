@@ -2,14 +2,18 @@ import 'package:fchatapi/util/PhoneUtil.dart';
 import 'package:fchatapi/util/UserObj.dart';
 import 'package:fchatapi/webapi/FileObj.dart';
 import 'package:fchatapi/webapi/HttpWebApi.dart';
+import 'package:fchatapi/webapi/StripeUtil/CardArr.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'appapi/BaseJS.dart';
 
 class FChatApiSdk {
   static FileObj fileobj = FileObj();
   static FileArrObj filearrobj = FileArrObj();
   static String griupid="";  //默认客户群聊
+  static CardArr loccard=CardArr();
   static init(String userid, String token, void Function(bool state) webcall,
       void Function(bool state) appcall) {
     UserObj.token = token;
@@ -19,10 +23,12 @@ class FChatApiSdk {
       if (value.data == "loginok") {
         webcall(true);
         _readgroupid();
+        loccard.readCard();  //读取本地卡信息
       } else {
         webcall(false);
       }
     });
+    BaseJS.apiRecdatainit();
     //服务器增加一个验证接口，初始化验证服务号是否上线，并判断采用url
     //进行登陆服务器，获取临时访问token 加入https 安全访问
   }

@@ -21,8 +21,12 @@ dependencies:
   http_parser: ^4.0.1
   dio: ^5.4.0
   intl: ^0.19.0
+  quickalert: ^1.0.1   #弹出框
   url_launcher: ^6.1.11
   path: ^1.8.3
+  flutter_stripe: ^11.4.0  #付款支付插件，支持ios google masert visa
+  encrypt: ^5.0.3   #加密，解密
+  flutter_credit_card: ^4.0.1  #检查信用卡合法性,输入ui
 
 dev_dependencies:
   flutter_test:
@@ -36,6 +40,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/img/
+    - assets/pay/
 
   plugin:
     platforms:

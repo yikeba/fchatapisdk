@@ -1,9 +1,11 @@
 import 'package:fchatapi/FChatApiSdk.dart';
+import 'package:fchatapi/appapi/PayObj.dart';
+import 'package:fchatapi/webapi/StripeUtil/WebPayUtil.dart';
+import 'package:fchatapi/webapi/WebUItools.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 
@@ -162,6 +164,15 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  paytest(){
+    PayObj pay=PayObj();
+    pay.amount="0.05";
+    pay.paytext="测试支付";
+    pay.pay((value){
+       print("app 支付返回结果$value");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,9 +207,24 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: delfile,
               child: const Text("删除文件"),
             ),
+            ElevatedButton(
+              onPressed: paytest,
+              child: const Text("app支付"),
+            ),
+            ElevatedButton(
+              onPressed: webpaytest,
+              child: const Text("网页支付"),
+            ),
           ],
         ),
       ),
     );
+  }
+  webpaytest(){
+     if(WebPayUtil.isLocCard()){
+       WebUItools.opencardlist(context);
+     }else {
+       WebUItools.openWebpay(context);
+     }
   }
 }
