@@ -106,29 +106,6 @@ class CardObj {
     }
   }
 
-
-
-  /*Future<String> readBankName() async {
-    try {
-      String cardcode = cardNumber.replaceAll(" ", "");
-      String first6 = cardcode.substring(0, 6);
-      String url = "https://lookup.binlist.net/$first6";
-      Response res = await NetworkUtil.Geturl(url);
-      final map = res.data;
-      //Map map=JsonUtil.strtoMap(rec);
-      PhoneUtil.applog("读取银行信息返回$map");
-      if(map.containsKey("bank")){
-        Map bankmap = map["bank"];
-        bank=bankmap["name"];
-        PhoneUtil.applog("读取银行信息$bank");
-        return bank;
-      }
-    }catch(e){
-      return "";
-    }
-    return "";
-  }*/
-
   stripe.CardFieldInputDetails getStripCard() {
     if (stripeCard == null) initStripCard();
     return stripeCard!;

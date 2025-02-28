@@ -1,5 +1,7 @@
 import 'package:fchatapi/FChatApiSdk.dart';
 import 'package:fchatapi/appapi/PayObj.dart';
+import 'package:fchatapi/util/PhoneUtil.dart';
+import 'package:fchatapi/webapi/FileObj.dart';
 import 'package:fchatapi/webapi/StripeUtil/WebPayUtil.dart';
 import 'package:fchatapi/webapi/WebUItools.dart';
 import 'package:file_picker/file_picker.dart';
@@ -8,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker_web/image_picker_web.dart';
-
+import 'dart:html' as html;
 void main() async {
   await dotenv.load();
   runApp(const MyApp());
@@ -53,24 +55,27 @@ class _MyHomePageState extends State<MyHomePage> {
   String? selectedFilePath;
 
   Future<void> pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.video,
       allowMultiple: false,
     );
 
     if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        selectedFileName = result.files.first.name;
-        selectedFilePath = result.files.first.path;
-      });
-
       if (kIsWeb) {
         final fileBytes = result.files.first.bytes;
+        html.File file = result.files.first.bytes != null
+            ? html.File([result.files.first.bytes!], result.files.first.name)
+            : result.files.first as html.File;
+        FChatApiSdk.fileobj.filemd=FileMD.video;
+        FChatApiSdk.fileobj.writeFile(file, (value) {
+          print("File 上传访问状态: $value");
+        });
         print('本地 File Name: $selectedFileName');
         print('本地 File Size: ${fileBytes?.length} bytes');
       } else {
         print('File Path: $selectedFilePath');
       }
+
     } else {
       setState(() {
         selectedFileName = null;
@@ -117,11 +122,11 @@ class _MyHomePageState extends State<MyHomePage> {
     FChatApiSdk.filearrobj.readMDthb((value) {
       for (String str in value) {
         index++;
-        //print("读取服务器原始路径:$str");
+        print("读取服务器原始路径:$str");
         String name=str.replaceAll("$userid/", "");
-        //print("读取文件明显名称:$name");
+        print("读取文件明显名称:$name");
         FChatApiSdk.fileobj.readFile(name, (data) {
-          print("读取指定文件内容:${data}");
+          PhoneUtil.applog("读取指定文件内容:${data}");
           endindex++;
           if (endindex == index) {
             Navigator.of(context).pop();
@@ -145,9 +150,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> pickImage() async {
     try {
       final pickedImage = await ImagePickerWeb.getImageAsFile();
-
       String? _fileName;
       if (pickedImage != null) {
+        FChatApiSdk.fileobj.filemd=FileMD.image;
         FChatApiSdk.fileobj.writeFile(pickedImage, (value) {
           print("File 上传访问状态: $value");
         });
@@ -222,9 +227,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   webpaytest(){
      if(WebPayUtil.isLocCard()){
-       WebUItools.opencardlist(context);
+       WebUItools.opencardlist(context,null,null);
      }else {
-       WebUItools.openWebpay(context);
+       WebUItools.openWebpay(context,null,null);
      }
   }
 }

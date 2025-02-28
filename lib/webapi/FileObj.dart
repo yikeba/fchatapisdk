@@ -8,6 +8,7 @@ import 'package:http_parser/http_parser.dart';
 import 'dart:typed_data';
 import 'package:path/path.dart' as pathobj;
 import '../util/JsonUtil.dart';
+import '../util/PhoneUtil.dart';
 import '../util/UserObj.dart';
 import 'WebCommand.dart'; // 用于二进制处理
 
@@ -18,6 +19,7 @@ class FileObj {
   final Dio _dio = Dio();
   Uint8List? fileBytes;
   FileMD filemd = FileMD.base;
+  bool ispublic=false;  //文件是否公开货私有
   String authHeader = 'Bearer ${UserObj.servertoken}'; // 设置 Bearer Token
 
   initfile() async {
@@ -34,6 +36,7 @@ class FileObj {
       fileBytes = await completer.future;
       // 生成 MD5 签名
       md5Hash = SignUtil.getUint8(fileBytes!);
+      PhoneUtil.applog("html file md5:$md5Hash");
     } catch (e) {
       print("Error generating MD5 from file: $e");
       return "Error";
@@ -43,26 +46,32 @@ class FileObj {
   Map<String, dynamic> _getFileMap() {
     Map<String, dynamic> map = {};
     map.putIfAbsent("userid", () => UserObj.userid);
-    map.putIfAbsent("command", () => WebCommand.upfile);
+    if(ispublic){
+      map.putIfAbsent("command", () => WebCommand.upfilepublic);
+    }else{
+      map.putIfAbsent("command", () => WebCommand.upfile);
+    }
     map.putIfAbsent("md5", () => md5Hash);
     map.putIfAbsent("sapppath", () => filemd.name);
     return map;
   }
 
   Map<String, dynamic> _getDataMap() {
-    //md5Hash=SignUtil.MD5str(filedata!);
-    md5Hash = SignUtil.getUint8(fileBytes!);
+    if(md5Hash.isEmpty) md5Hash = SignUtil.getUint8(fileBytes!);
     Map<String, dynamic> map = {};
     map.putIfAbsent("userid", () => UserObj.userid);
-    map.putIfAbsent("command", () => WebCommand.upData);
+    if(ispublic){
+      map.putIfAbsent("command", () => WebCommand.upDatapublic);
+    }else{
+      map.putIfAbsent("command", () => WebCommand.upData);
+    }
     map.putIfAbsent("md5", () => md5Hash);
     map.putIfAbsent("sapppath", () => filemd.name);
     print("上传服务器文本map$map");
     return map;
   }
 
-  Future<void> writeByte(
-      Uint8List data, String name, void Function(bool state) upstate) async {
+  Future<void> writeByte(Uint8List data, String name, void Function(bool state) upstate) async {
     try {
       fileBytes = data;
       Map<String, dynamic> map = _getFileMap();
@@ -91,7 +100,7 @@ class FileObj {
       if (response.statusCode == 200) {
         upstate(true);
         String rec = JsonUtil.getbase64(response.data);
-        print("文件上传成功: $rec");
+        print("writeByte文件上传成功: $rec");
       } else {
         print("文件上传失败: ${response.statusCode}");
       }
@@ -100,21 +109,69 @@ class FileObj {
     }
   }
 
-  Future<void> writeData(
-      String data, String name, void Function(bool state) upstate) async {
+  Future<void> editData(String data, String name, String md5,void Function(String state) upstate) async {
     try {
       if (data.isEmpty) {
         print("无法读取文件内容");
         return;
       }
       filedata = JsonUtil.setbase64(data);
-      //filedata=data;
       fileBytes = Uint8List.fromList(filedata!.codeUnits);
       if (fileBytes == null) {
         print("数据转换base64 byte错误");
         return;
       }
-      print("上传文本二进制长度${fileBytes!.length}");
+      md5Hash=md5;
+      Map<String, dynamic> map = _getDataMap();
+      map.putIfAbsent(
+        'file',
+            () => MultipartFile.fromBytes(
+          fileBytes!,
+          filename: name,
+          contentType: MediaType('text', 'html'),
+        ),
+      );
+      FormData formData = FormData.fromMap(map);
+      // 发送 POST 请求
+      String url = HttpWebApi.geturl();
+      Response response = await _dio.post(
+        url,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            "Authorization": authHeader
+          },
+        ),
+      );
+      // 检查上传结果
+      if (response.statusCode == 200) {
+        String rec = JsonUtil.getbase64(response.data);
+        upstate(rec);
+        print(" editData 文件上传成功: $rec");
+      } else {
+        print("文件上传失败: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("上传过程中出现错误: $e");
+    }
+  }
+
+
+  Future<void> writeData(
+      String data, String name, void Function(String state) upstate) async {
+    try {
+      if (data.isEmpty) {
+        print("无法读取文件内容");
+        return;
+      }
+      filedata = JsonUtil.setbase64(data);
+      fileBytes = Uint8List.fromList(filedata!.codeUnits);
+      if (fileBytes == null) {
+        print("数据转换base64 byte错误");
+        return;
+      }
+      //print("上传文本二进制长度${fileBytes!.length}");
       Map<String, dynamic> map = _getDataMap();
       map.putIfAbsent(
         'file',
@@ -139,9 +196,9 @@ class FileObj {
       );
       // 检查上传结果
       if (response.statusCode == 200) {
-        upstate(true);
         String rec = JsonUtil.getbase64(response.data);
-        print("文件上传成功: $rec");
+        upstate(rec);
+        print(" writeData 文件上传成功: $rec");
       } else {
         print("文件上传失败: ${response.statusCode}");
       }
@@ -151,9 +208,15 @@ class FileObj {
   }
 
   Future<void> writeFile(
-      html.File file, void Function(bool state) upstate) async {
+      html.File file, void Function(String url) upstate) async {
     this.file = file;
     await initfile();
+    String filename="";
+    if(file.name.isEmpty){
+       filename=md5Hash;
+    }else{
+      filename=file.name;
+    }
     try {
       if (fileBytes == null) {
         print("无法读取文件内容");
@@ -165,7 +228,7 @@ class FileObj {
         'file',
         () => MultipartFile.fromBytes(
           fileBytes!,
-          filename: file!.name,
+          filename: filename,
           contentType: MediaType('text', 'html'),
         ),
       );
@@ -184,9 +247,17 @@ class FileObj {
       );
       // 检查上传结果
       if (response.statusCode == 200) {
-        upstate(true);
         String rec = JsonUtil.getbase64(response.data);
-        print("文件上传成功: $rec");
+        Map recmap=JsonUtil.strtoMap(rec);
+        String url="";
+        PhoneUtil.applog("file 文件上传成功: $rec");
+        if(recmap.containsKey(filename)){
+          String md5=recmap[filename];
+          url="https://fchatmenchat.s3.ap-southeast-1.amazonaws.com/"+UserObj.userid+"/"+filemd.name+"/"+md5;
+          print("file 公开访问链接: $url");
+        }
+        upstate(url);
+        PhoneUtil.applog("file 文件上传成功: $rec");
       } else {
         print("文件上传失败: ${response.statusCode}");
       }
@@ -211,7 +282,7 @@ class FileObj {
       String data = RecObj(rec).data;
       filedata(data);
     } catch (e) {
-      print("上传过程中出现错误: $e");
+      print("读取文件过程中出现错误: $e");
     }
   }
 
@@ -266,17 +337,14 @@ class FileArrObj {
     Map<String, dynamic> map = _getReadfileMap(md, filename);
     String rec = await HttpWebApi.httpspost(map);
     rec = JsonUtil.getbase64(rec);
-    print("读取文件制定文件返回$rec");
+    //print("读取文件制定文件返回$rec");
     file(parsefile(RecObj(rec).data, filename));
   }
 
-  Future<void> readMD(void Function(List<FileObj>) filearr,
-      {String md = ""}) async {
+  Future<void> readMD(void Function(List<FileObj>) filearr, {String md = ""}) async {
     if (md.isEmpty) md = FileMD.base.name;
-    // print("读取服务器目录$md");
     Map<String, dynamic> map = _getReadmdMap(md);
     String rec = await HttpWebApi.httpspost(map);
-    //print("读取文件目录返回$rec");
     filearr(parsefileobj(RecObj(rec).json));
   }
 
@@ -308,4 +376,4 @@ class FileArrObj {
   }
 }
 
-enum FileMD { base, assets, image, video, product, order, payorder, other }
+enum FileMD { base, assets, image, video, product, tmporder,order, payorder,other }

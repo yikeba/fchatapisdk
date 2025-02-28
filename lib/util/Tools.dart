@@ -26,6 +26,8 @@ class Tools {
     return Color.fromRGBO(r, g, b, 1); // 生成深色
   }
 
+
+
   static Color generateRandomColor() {
     Random random = Random();
     int r, g, b;

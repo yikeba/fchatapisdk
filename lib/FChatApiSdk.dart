@@ -4,8 +4,7 @@ import 'package:fchatapi/webapi/FileObj.dart';
 import 'package:fchatapi/webapi/HttpWebApi.dart';
 import 'package:fchatapi/webapi/StripeUtil/CardArr.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+
 
 import 'appapi/BaseJS.dart';
 
@@ -19,7 +18,7 @@ class FChatApiSdk {
     UserObj.token = token;
     UserObj.userid = userid;
     HttpWebApi.weblogin().then((value) {
-      PhoneUtil.applog("服务器验证返回$value");
+      //PhoneUtil.applog("服务器验证返回$value");
       if (value.data == "loginok") {
         webcall(true);
         _readgroupid();

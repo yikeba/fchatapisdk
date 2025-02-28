@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import '../util/JsonUtil.dart';
 import '../util/PhoneUtil.dart';
 import '../util/SignUtil.dart';
+import 'dart:html' as html;
 
 class HttpWebApi {
   static Future<String> postServerForm(String url, Map<String, dynamic> post,
@@ -55,6 +56,15 @@ class HttpWebApi {
   static geturl() {
     if (kDebugMode) {
       return "https://www.freechat.cloud/sappbox";
+    } else {
+      return "https://www.freechat.cloud/sapp";
+    }
+  }
+
+  static gethtmlurl() {
+    if (kDebugMode) {
+      //return "https://www.freechat.cloud/sappbox";
+      return html.window.location.href;
     } else {
       return "https://www.freechat.cloud/sapp";
     }

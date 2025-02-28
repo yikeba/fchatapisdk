@@ -137,6 +137,7 @@ class QuickAlertShow {
 
 
 
+
   static Future<String> showinfo(BuildContext context, String title, String text) async {
     return await QuickAlert.show(
         context: context,

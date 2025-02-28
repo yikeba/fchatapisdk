@@ -27,6 +27,7 @@ dependencies:
   flutter_stripe: ^11.4.0  #付款支付插件，支持ios google masert visa
   encrypt: ^5.0.3   #加密，解密
   flutter_credit_card: ^4.0.1  #检查信用卡合法性,输入ui
+  geolocator: ^12.0.0  #定位位置
 
 dev_dependencies:
   flutter_test:
