@@ -15,8 +15,7 @@ class CookieStorage {
   }
 
 
-  /// **删除 Cookie**
-  static void deleteCookie(String name) {
-    html.document.cookie = "$name=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+  static void deleteFromStorage(String name) {
+    html.window.localStorage.remove(name);
   }
 }

@@ -1,11 +1,13 @@
 import 'package:fchatapi/util/PhoneUtil.dart';
+import 'package:fchatapi/util/Translate.dart';
 import 'package:fchatapi/util/UserObj.dart';
 import 'package:fchatapi/webapi/FileObj.dart';
 import 'package:fchatapi/webapi/HttpWebApi.dart';
 import 'package:fchatapi/webapi/StripeUtil/CardArr.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
-
-
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter_stripe_web/flutter_stripe_web.dart';
 import 'appapi/BaseJS.dart';
 
 class FChatApiSdk {
@@ -14,15 +16,16 @@ class FChatApiSdk {
   static String griupid="";  //默认客户群聊
   static CardArr loccard=CardArr();
   static init(String userid, String token, void Function(bool state) webcall,
-      void Function(bool state) appcall) {
+      void Function(bool state) appcall,{String appname=""}) {
+    WidgetsFlutterBinding.ensureInitialized();
+    Translate.initTra();
     UserObj.token = token;
     UserObj.userid = userid;
+    UserObj.appname=appname;
     HttpWebApi.weblogin().then((value) {
-      //PhoneUtil.applog("服务器验证返回$value");
       if (value.data == "loginok") {
         webcall(true);
         _readgroupid();
-        loccard.readCard();  //读取本地卡信息
       } else {
         webcall(false);
       }
@@ -35,7 +38,7 @@ class FChatApiSdk {
     Map<String,dynamic> map=_getgroupid();
     String rec=await HttpWebApi.httpspost(map);
     griupid=RecObj(rec).data;
-    PhoneUtil.applog("读取服务号默认客户群聊$griupid");
+    //PhoneUtil.applog("读取服务号默认客户群聊$griupid");
   }
 
   static Map<String,dynamic> _getgroupid(){

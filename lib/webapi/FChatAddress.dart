@@ -2,7 +2,7 @@ import '../util/JsonUtil.dart';
 import 'package:geolocator/geolocator.dart';
 
 class FChatAddress{
-  Position?position;
+  Position? position;
   String address="";
   String phone="";
   String email="";

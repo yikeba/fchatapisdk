@@ -1,6 +1,6 @@
 name: fchatapi
 description: "fchatapi"
-version: 0.0.3
+version: 0.0.4
 homepage:
 
 environment:
@@ -12,7 +12,8 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  web: ^0.5.1
+  #web: ^0.5.1
+  web: ^1.0.0
   plugin_platform_interface: ^2.0.2
   crypto: ^3.0.1     #各种加密，签名综合组件
   flutter_screenutil: ^5.8.1
@@ -25,9 +26,14 @@ dependencies:
   url_launcher: ^6.1.11
   path: ^1.8.3
   flutter_stripe: ^11.4.0  #付款支付插件，支持ios google masert visa
+  flutter_stripe_web: ^6.4.0  #web版本
+  translator: ^1.0.3+1  #免费翻译插件
+  country_currency_pickers: ^3.0.0     #货币数据与国旗插件
+  language_picker: ^0.4.5
   encrypt: ^5.0.3   #加密，解密
   flutter_credit_card: ^4.0.1  #检查信用卡合法性,输入ui
   geolocator: ^12.0.0  #定位位置
+  qr_flutter: ^4.1.0  #显示二维码
 
 dev_dependencies:
   flutter_test:

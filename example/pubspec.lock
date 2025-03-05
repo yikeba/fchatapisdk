@@ -81,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  country_currency_pickers:
+    dependency: transitive
+    description:
+      name: country_currency_pickers
+      sha256: "5a6fd78f33f5c7806677b04675be14bb8a5da3826678817790ed871f1c024ce5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   cross_file:
     dependency: transitive
     description:
@@ -167,7 +175,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.2"
+    version: "0.0.3"
   ffi:
     dependency: transitive
     description:
@@ -290,6 +298,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "11.4.0"
+  flutter_stripe_web:
+    dependency: transitive
+    description:
+      name: flutter_stripe_web
+      sha256: "9dda08ae58014d64f03184c22cdc81a9cb7f02beae11fd710a1258fbce826e4e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.4.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -349,10 +365,10 @@ packages:
     dependency: transitive
     description:
       name: geolocator_web
-      sha256: "7a22f400d831f924a89d931ba126a10e6b8b437f31e6b9311320435f3e1571bd"
+      sha256: "2ed69328e05cd94e7eb48bb0535f5fc0c0c44d1c4fa1e9737267484d05c29b5e"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.0"
+    version: "4.1.1"
   geolocator_windows:
     dependency: transitive
     description:
@@ -494,6 +510,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
+  language_picker:
+    dependency: transitive
+    description:
+      name: language_picker
+      sha256: cace0eab53b712e26f5d2cd834a050b6dd6ab56b2ba31b3000dbe5f89f33f5fd
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.5"
   leak_tracker:
     dependency: transitive
     description:
@@ -638,6 +662,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.2"
+  qr:
+    dependency: transitive
+    description:
+      name: qr
+      sha256: "5a1d2586170e172b8a8c8470bbbffd5eb0cd38a66c0d77155ea138d3af3a4445"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
+  qr_flutter:
+    dependency: transitive
+    description:
+      name: qr_flutter
+      sha256: "5095f0fc6e3f71d08adef8feccc8cea4f12eec18a2e31c2e8d82cb6019f4b097"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   quickalert:
     dependency: "direct main"
     description:
@@ -646,6 +686,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  recase:
+    dependency: transitive
+    description:
+      name: recase
+      sha256: e4eb4ec2dcdee52dcf99cb4ceabaffc631d7424ee55e56f280bc039737f89213
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -707,6 +755,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "11.4.0"
+  stripe_js:
+    dependency: transitive
+    description:
+      name: stripe_js
+      sha256: ab8ad22cbcb071ac8f2dc29a81f7d53a60c5a4b678db45cc04b46b1507334423
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.3.0"
   stripe_platform_interface:
     dependency: transitive
     description:
@@ -739,6 +795,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.2"
+  translator:
+    dependency: transitive
+    description:
+      name: translator
+      sha256: "8f5e56d0ffb8f493b23ad0e4f824c17e5f43d45997e33b7c7b689c7a33cf3b06"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3+1"
   typed_data:
     dependency: transitive
     description:
@@ -895,10 +959,10 @@ packages:
     dependency: transitive
     description:
       name: web
-      sha256: "97da13628db363c635202ad97068d47c5b8aa555808e7a9411963c533b449b27"
+      sha256: "868d88a33d8a87b18ffc05f9f030ba328ffefba92d6c127917a2ba740f9cfe4a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.1"
+    version: "1.1.1"
   webdriver:
     dependency: transitive
     description:

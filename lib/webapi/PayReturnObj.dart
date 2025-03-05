@@ -3,6 +3,7 @@ class PayReturnObj{
   //1 想其他系统rueturn url 支付成功通知
   //2 或处理自己的服务号业务逻辑
   String returnurl="";  //想其他服务器发送支付成功通知
+  String locurl="";
   String apptag="";     //处理自己小程序标签业务逻辑
   String json="";  //附加内容数据
   //ChatMessage? mes;  //系统通知消息，将有999账户发出
@@ -13,6 +14,7 @@ class PayReturnObj{
     if(returnurl.isNotEmpty) map.putIfAbsent("returnurl", () => returnurl);
     if(apptag.isNotEmpty) map.putIfAbsent("apptag", () => apptag);
     if(json.isNotEmpty) map.putIfAbsent("json", () => json);
+    if(locurl.isNotEmpty) map.putIfAbsent("locurl", ()=>locurl);
     // if(mes!=null) map.putIfAbsent("mes", () => mes!.getJson());
     //if(chatmes!=null) map.putIfAbsent("chatmes", () => chatmes!.toString());
     return map;

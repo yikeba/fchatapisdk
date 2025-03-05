@@ -1,12 +1,15 @@
-import 'package:fchatapi/FChatApiSdk.dart';
+
 import 'package:fchatapi/WidgetUtil/CheckWidget.dart';
 import 'package:fchatapi/util/Tools.dart';
-import 'package:fchatapi/util/UserObj.dart';
 import 'package:fchatapi/webapi/Bank/ABA_KH.dart';
-import 'package:fchatapi/webapi/FChatAddress.dart';
+import 'package:fchatapi/webapi/StripeUtil/CardPay.dart';
 import 'package:fchatapi/webapi/StripeUtil/CookieStorage.dart';
+import 'package:fchatapi/webapi/StripeUtil/WebPayUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+
+import '../../FChatApiSdk.dart';
 import '../../util/PhoneUtil.dart';
 import '../PayHtmlObj.dart';
 import 'CardObj.dart';
@@ -26,14 +29,14 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
   //bool? _saveCard = false;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   double fontsize = 13;
-  FocusNode cardFocusNode = FocusNode();
   String cardnumber = "";
   Widget orderheight = const SizedBox(
     height: 20,
   );
   double width = 512;
   double height = 0;
-
+  bool isCardinput=false;
+  bool isstripestate=false;
   @override
   void initState() {
     // TODO: implement initState
@@ -54,10 +57,21 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
         widget.cardobj = CardObj.decryptCard(cardinfo);
         cardnumber = widget.cardobj!.maskCardNumber();
       } else {
-        PhoneUtil.applog("未读取到本地cookie");
+
         widget.cardobj = CardObj();
+        widget.cardobj!.cardHolderName=widget.pobj!.fChatAddress!.consumer;
+        PhoneUtil.applog("初始化赋予银行卡客户名称${widget.cardobj!.cardHolderName}");
       }
     }
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      String stripekey=await WebPayUtil.readstripekey();
+      Stripe.publishableKey=stripekey;
+      Stripe.urlScheme = 'flutterstripe';
+      await Stripe.instance.applySettings();
+      isstripestate=true;
+
+    });
+
   }
 
   List initcards() {
@@ -73,8 +87,7 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
   String _getcardnum() {
     if (cardnumber.isNotEmpty) return "";
     if (widget.cardobj == null) return "";
-    if (widget.cardobj!.cardNumber.isNotEmpty)
-      return widget.cardobj!.cardNumber;
+    if (widget.cardobj!.cardNumber.isNotEmpty) return widget.cardobj!.cardNumber;
     return "";
   }
 
@@ -130,7 +143,8 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
         ]);
   }
 
-  _getCardInput(){
+  InputCard? inputCard;
+  Widget _getCardInput(void Function(InputCard value) callCard){
     return  Container(
       width: width,
       margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
@@ -143,11 +157,12 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
         isHolderNameVisible: true,
         isCardNumberVisible: true,
         isExpiryDateVisible: true,
-        cardHolderName: widget.cardobj?.cardHolderName ?? "",
+        cardHolderName: widget.cardobj?.cardHolderName ?? widget.pobj!.fChatAddress!.consumer,
         expiryDate: widget.cardobj?.expiryDate ?? "",
         onFormComplete: () {
-          PhoneUtil.applog("信用卡输入完毕");
-          pay();
+          inputCard!.state=true;
+          callCard(inputCard!);
+          print("收到信用卡完成通知");
         },
         inputConfiguration: InputConfiguration(
           cardNumberDecoration: InputDecoration(
@@ -191,7 +206,10 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
                 fontSize: fontsize, color: Colors.white),
           ),
         ),
-        onCreditCardModelChange: onCreditCardModelChange,
+        onCreditCardModelChange: (CreditCardModel creditCardModel){
+          inputCard=InputCard(creditCardModel, false);
+          callCard(inputCard!);
+        },
       ),
     );
   }
@@ -224,7 +242,16 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
                            setState(() {
 
                            });
-                        }, label:"信用卡/借记卡", child:_getCardInput()),
+                        }, label:"信用卡/借记卡", child:_getCardInput((value){
+                            PhoneUtil.applog("信用卡输入完毕${value.creditCardModel}，完成状态${value.state}");
+                            if(value.state){
+
+                              isCardinput=value.state;
+                              return;
+                            }
+                            onCreditCardModelChange(value.creditCardModel);
+
+                        })),
                         const SizedBox(height: 1),
                         CheckTextWidget(key:ValueKey(Tools.generateRandomString(70)),initialValue: isaba, onChanged: (state){
                            isaba=state;
@@ -254,27 +281,44 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
                 )));
   }
 
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void onCreditCardModelChange(CreditCardModel creditCardModel) {
-    setState(() {
       widget.cardobj!.cardNumber = creditCardModel.cardNumber;
       widget.cardobj!.expiryDate = creditCardModel.expiryDate;
       widget.cardobj!.cardHolderName = creditCardModel.cardHolderName;
       widget.cardobj!.cvvCode = creditCardModel.cvvCode;
       widget.cardobj!.isCvvFocused = creditCardModel.isCvvFocused;
-    });
   }
 
   Future<PayHtmlObj?> pay() async {
       if(widget.pobj!=null) {
-        //FChatApiSdk.loccard.saveCard(widget.cardobj!);
         widget.pobj!.creatPayorder();
         if(isaba) {
           await ABA_KH.ABApayweb(widget.pobj!.money, widget.pobj!.payid);
           return widget.pobj;
         }else{
-
+           print("银行卡卡号${widget.cardobj!.cardNumber}");
+           print("银行卡信息输入${widget.cardobj!.toJson()}");
+           if(isCardinput || widget.cardobj!.isCardInfoComplete()){
+              FChatApiSdk.loccard.saveCard(widget.cardobj!);  //保存本地cookie
+              _showSnackbar("银行卡输入完毕，发起支付等待服务器通知");
+              await CardPay().handlePayment(widget.pobj!, widget.cardobj!);
+           }else{
+             //print("银行卡信息没有输入完善${widget.cardobj!.toJson()}");
+             _showSnackbar("请输入完毕银行卡信息，在发起支付");
+           }
         }
       }
       return null;
   }
+}
+
+class InputCard{
+  CreditCardModel creditCardModel;
+  bool state=false;
+  InputCard(this.creditCardModel,this.state);
+
 }

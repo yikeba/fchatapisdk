@@ -157,7 +157,10 @@ class Tools {
     }
   }
 
-
+  static void showSnackbar(BuildContext context,String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
 
 
 
@@ -267,6 +270,11 @@ class Tools {
     return double.tryParse(s) != null;
   }
 
+  static Copytext(BuildContext context, String str) async {
+    Clipboard.setData(ClipboardData(text: str));
+    showSnackbar(context, str);
+  }
+
 
   static String isTexturl(String text) {
     // final urlRegExp = RegExp(
@@ -281,6 +289,9 @@ class Tools {
     return urls[0];
   }
 }
+
+
+
 
 //返回文本长度，宽度，或限制宽度的高度
 class getTextSize {

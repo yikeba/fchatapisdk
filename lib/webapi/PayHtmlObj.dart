@@ -20,8 +20,11 @@ class PayHtmlObj{
   PayType paytype=PayType.consumption;   //只能是消费
   String paystr="";   //付款说明文字
   String payid="";
+  int date=0;
   FChatAddress? fChatAddress;
   PayReturnObj? probj;
+  String merchantorder="";   //服务号订单json str
+  bool status=false;   //支付流水单支付状态
   PayHtmlObj(this.recobj,String phone,String name){
     payuserid=phone;
     payname=name;
@@ -32,6 +35,16 @@ class PayHtmlObj{
     payuserid=phone;
     payname=name;
     payid=phone+DateUtil.getUTCint().toRadixString(32);
+
+  }
+  PayHtmlObj.fromJson(Map map){
+    payid=map["payid"];
+    payuserid=map["payuserid"];
+    if(map.containsKey("status")){
+      status=map["status"];
+    }
+    money=map["money"];
+    date=map["date"];
   }
 
   getJson(){

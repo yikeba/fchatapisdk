@@ -2,14 +2,16 @@
 import 'package:fchatapi/FChatApiSdk.dart';
 import 'package:flutter/material.dart';
 import '../../util/QuickAlertShow.dart';
+import '../PayHtmlObj.dart';
 import '../WebUItools.dart';
 import 'CardObj.dart';
 import 'CardUtil.dart';
 
 
 class BankCardScreen extends StatefulWidget {
-  //PayObj? payobj;
-  //BankCardScreen({super.key,required this.payobj});
+  Widget? order;
+  PayHtmlObj? pobj;
+  BankCardScreen({super.key,this.order,this.pobj});
   @override
   _BankCardScreenState createState() => _BankCardScreenState();
 }
@@ -25,13 +27,7 @@ class _BankCardScreenState extends State<BankCardScreen> {
   }
 
   Future<void> _addBankCard() async {
-    CardObj? card=await WebUItools.openWebpay(context,null,null);
-    if(card!=null) {
-      CardUtil.cardarr.insert(0, card);
-      setState(() {
-
-      });
-    }
+    await WebUItools.openWebpay(context,null,null);
   }
 
 
@@ -68,7 +64,7 @@ class _BankCardScreenState extends State<BankCardScreen> {
             margin: EdgeInsets.fromLTRB(0, 5, 0, 15),
             child: ElevatedButton(
               onPressed: _addBankCard,
-              child: const Text("+ 添加银行卡"),
+              child: const Text("其他银行卡付款"),
             ),
           ),
         ],

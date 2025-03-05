@@ -14,6 +14,13 @@ class WebCommand{
   static const String delfile="delfile";  //删除指定文件
   static const String paymentorder="paymentorder";  //如提交系统支付流水单
   static const String ABApay="ABApay";  //如提交系统支付流水单
-
+  static const String stripepay="stripepay"; //提交信用卡支付
+  static const String stripeorder="stripeorder"; //提交信用卡订单支付
+  static const String payidQuery="payidQuery";  //查询订单是否支付
+  static const String readstripekey="readstripekey";  //读取stripekey
+  static const String createWebPaymentIntent="createWebPaymentIntent";  //服务器创建支付PaymentIntent
+  static const String createWebPayUrl="createWebPayUrl";  //服务器创建stripe 跳转支付
+  static const String verifyPay="verifyPay";  //验证支付是否成功
+  static const String weblogin="weblogin";  //web扫码登录
 
 }

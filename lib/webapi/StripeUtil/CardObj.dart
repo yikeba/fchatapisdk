@@ -3,6 +3,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe_web/flutter_stripe_web.dart' as web;
 import '../../util/JsonUtil.dart';
 import '../../util/PhoneUtil.dart';
 import '../../util/SignUtil.dart';
@@ -56,7 +57,6 @@ class CardObj {
   }
 
   CardObj.decryptCard(String data){
-
     try {
       String cardinfo=decryptData(data);
       Map map = JsonUtil.strtoMap(cardinfo);
@@ -120,12 +120,12 @@ class CardObj {
   }
 
   Future<Map> creatPaymentMethod() async {
-    await stripe.Stripe.instance.dangerouslyUpdateCardDetails(getCardDetails());
+    await web.WebStripe.instance.dangerouslyUpdateCardDetails(getCardDetails());
     final paymentMethod = await stripe.Stripe.instance.createPaymentMethod(
         params: const stripe.PaymentMethodParams.card(
       paymentMethodData: stripe.PaymentMethodData(),
     ));
-    PhoneUtil.applog("返回apple pay支付内容$paymentMethod");
+    PhoneUtil.applog("返回银行卡支付内容$paymentMethod");
     return paymentMethod.toJson();
   }
 
@@ -155,33 +155,12 @@ class CardObj {
     return paymentMethod;
   }
 
-  Widget cardwidget({required VoidCallback onTap}) {
-    if (stripeCard == null) initStripCard();
-    return Card(
-      color: Tools.generateRandomDarkColor(),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      margin: EdgeInsets.all(10),
-      child: ListTile(
-        leading: getCardBrandIcon(),
-        title: Text(
-            _getbank(),
-          style: TextStyle(color: Colors.white, fontSize: 13),
-        ),
-        subtitle: Text(
-          "**** **** **** " + last4,
-          style: TextStyle(color: Colors.white),
-        ),
-        trailing: IconButton(
-          icon: Icon(Icons.delete, color: Colors.white),
-          onPressed: () {
-            onTap();
-          },
-        ),
-      ),
-    );
+  getpaymentMethodID() async {
+    paymentMethod=await creatPaymentMethod();
+    paymentMethodID=paymentMethod["id"];
+    return paymentMethodID;
   }
+
   String _getbank(){
     if(bank.isEmpty){
       return detectCardBrand(cardNumber);
@@ -276,7 +255,7 @@ class CardObj {
   }
 
   String decrypt(String encryptedBase64) {
-    String key = adjustKeyLength(UserObj.servertoken);
+    String key = adjustKeyLength(UserObj.token);
     final encrypter = encrypt.Encrypter(encrypt.AES(encrypt.Key.fromUtf8(key), mode: encrypt.AESMode.ecb));
     final decrypted = encrypter.decrypt(encrypt.Encrypted.fromBase64(encryptedBase64));
     return decrypted;
@@ -287,7 +266,7 @@ class CardObj {
   }
 
   String encryptData() {  //加密
-    String key = adjustKeyLength(UserObj.servertoken);
+    String key = adjustKeyLength(UserObj.token);
     final encrypter = encrypt.Encrypter(
       encrypt.AES(encrypt.Key.fromUtf8(key), mode: encrypt.AESMode.ecb),
     );
@@ -297,7 +276,7 @@ class CardObj {
 
   /// **解密数据**
   String decryptData(String encryptedBase64) {
-    String key = adjustKeyLength(UserObj.servertoken);
+    String key = adjustKeyLength(UserObj.token);
     final encrypter = encrypt.Encrypter(
       encrypt.AES(encrypt.Key.fromUtf8(key), mode: encrypt.AESMode.ecb),
     );
@@ -314,4 +293,36 @@ class CardObj {
       return key.padRight(16, '0'); // 不足补 0
     }
   }
+
+  bool isCardInfoComplete() {
+    return isValidCardNumber(cardNumber) &&
+          isValidExpiryDate(expiryDate) &&
+          isValidCVV(cvvCode);
+
+  }
+
+// Luhn 算法校验银行卡号 不能用这个 算法，有些银行卡不支持
+  bool isValidCardNumber(String cardNumber) {
+    if (cardNumber.length < 13 || cardNumber.length > 19) return false;
+    return true;
+  }
+
+// 有效期校验 (MM/YY 或 MM/YYYY)
+  bool isValidExpiryDate(String expiryDate) {
+    final RegExp regex = RegExp(r"^(0[1-9]|1[0-2])\/(\d{2}|\d{4})$");
+    if (!regex.hasMatch(expiryDate)) return false;
+    List<String> parts = expiryDate.split('/');
+    int month = int.parse(parts[0]);
+    int year = int.parse(parts[1]);
+    if (year < 100) year += 2000; // 转换两位年份为四位
+    DateTime now = DateTime.now();
+    DateTime expiry = DateTime(year, month + 1, 0);
+    return expiry.isAfter(now);
+  }
+
+// CVV 校验 (Visa/MasterCard: 3 位, Amex: 4 位)
+  bool isValidCVV(String cvv) {
+    return RegExp(r"^\d{3,4}$").hasMatch(cvv);
+  }
+
 }

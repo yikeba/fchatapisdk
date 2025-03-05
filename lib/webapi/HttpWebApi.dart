@@ -61,13 +61,20 @@ class HttpWebApi {
     }
   }
 
-  static gethtmlurl() {
+  static String gethtmlurl() {
     if (kDebugMode) {
-      //return "https://www.freechat.cloud/sappbox";
-      return html.window.location.href;
+      return _getBaseUrl(html.window.location.href);
     } else {
-      return "https://www.freechat.cloud/sapp";
+      PhoneUtil.applog("返回url路径:${html.window.location.href}");
+      return "https://www.freechat.cloud/${UserObj.userid}/";
     }
+  }
+
+  static String _getBaseUrl(String fullUrl) {
+    Uri uri = Uri.parse(fullUrl);
+    String baseUrl = "${uri.scheme}://${uri.host}:${uri.port}";
+    // 确保去掉 URL 末尾的 `/`
+    return baseUrl.replaceAll(RegExp(r'/$'), '');
   }
 
   static Map<String, dynamic> _logindata() {
@@ -194,7 +201,6 @@ class RecObj{
     if(code==200){
       if(recservermap.containsKey("token")){
         UserObj.servertoken=recservermap["token"];
-        //PhoneUtil.applog("获得服务器token:${UserObj.servertoken}");
       }
       //print("读取服务器返回对象$rec");
       state=true;
