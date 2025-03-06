@@ -338,11 +338,9 @@ class JsonUtil {
   }
 
   static int getmoneyint(String str) {
-    //元单位字符串 转化为分单位整型
-    num mdu = strtodou(str);
-    mdu = mdu * 100;
-    return mdu.toInt();
+    return (double.parse(str) * 100).round();  // 使用 round() 四舍五入
   }
+
   //倒序，
   static Map sortdescMap(Map map){
     List keys = map.keys.toList();

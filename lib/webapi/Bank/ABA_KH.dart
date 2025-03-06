@@ -1,4 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:fchatapi/util/Tools.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
 import 'dart:js' as js;
@@ -14,20 +17,20 @@ import '../WebUtil.dart';
 class ABA_KH{
 
   //这事是打开aba app 区分android ios打开
-  static Future<bool> openpayaba(Map abamap) async {
-    if (abamap.isEmpty) {
-      return false;
-    }
+  static Future<bool> openpayaba(BuildContext context,Map abamap) async {
+    if (abamap.isEmpty) return false;
     String _url = abamap["abapay_deeplink"];
     if (!WebUtil.isMobileiBrowser()) {
       _url = abamap["qrString"];
     }
     Uri uri = Uri.parse(_url);
     try {
-      if (await launchUrl(uri)) {
+      if (await launchUrl(uri,mode: LaunchMode.externalApplication)) {
         return true;
       }
     } catch (e) {
+      print("打开 ABA App 失败: $e");
+      Tools.showSnackbar(context, "打开aba bank err $e");
       return false;
     }
     return false;
@@ -85,7 +88,7 @@ class ABA_KH{
     return map;
   }
 
-  static Future<bool> ABApayweb(String amount, String payid) async {
+  static Future<bool> abapayweb(BuildContext context,String amount, String payid) async {
     PhoneUtil.applog("支付金额:$amount");
     Map map = {};
     map.putIfAbsent("amount", () => amount);
@@ -97,10 +100,9 @@ class ABA_KH{
     PhoneUtil.applog("aba服务器返回$rec");
     RecObj robj=RecObj(rec);
     PhoneUtil.applog("服务器发起aba支付调用${robj.json}");
-    return openpayaba(robj.json);
+    bool isopenaba=await openpayaba(context,robj.json);
+    return isopenaba;
   }
-
-
 
 }
 

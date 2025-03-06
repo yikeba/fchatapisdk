@@ -23,6 +23,7 @@ class WebPayUtil{
    static Future<bool> isQuery_payID(String payid) async {
        Map map={};
        map.putIfAbsent("payid", ()=> payid);
+       map.putIfAbsent("userid", ()=> UserObj.userid);
        Map<String,dynamic>sendmap=getDataMap(map,WebCommand.payidQuery);
        String rec=await httpFchatserver(sendmap);
        RecObj robj=RecObj(rec);
@@ -33,10 +34,11 @@ class WebPayUtil{
        return false;
    }
 
-   static Future<bool> isverifyPay(String? sessionId,String? payid) async {
+   static Future<VerifyPayObj> isverifyPay(String? sessionId,String? payid) async {
      //b必须有一个不能是null
+     VerifyPayObj verifyPayObj=VerifyPayObj();
      if (sessionId == null && payid == null) {
-        return false;
+        return verifyPayObj;
      }
      sessionId ?? "";
      payid ?? "";
@@ -48,18 +50,23 @@ class WebPayUtil{
      RecObj robj=RecObj(rec);
      if(robj.json.containsKey("payid")){
        PhoneUtil.applog("查询支付流水单id${robj.json["payid"]}");
+       if(payid!.isEmpty) payid=robj.json["payid"];
      }else{
        PhoneUtil.applog("没有返回支付流水id");
      }
+
+     verifyPayObj.payid=payid!;
+     verifyPayObj.ispay=false;
      if(robj.json.containsKey("status")){
-       return robj.json["status"];
+       verifyPayObj.ispay= robj.json["status"];
      }
-     return false;
+     return verifyPayObj;
    }
    //通过payid 返回支付对象
    static Future<PayHtmlObj> getPayHtmlObj(String payid) async {
      Map map={};
      map.putIfAbsent("payid", ()=> payid);
+     map.putIfAbsent("userid", ()=> UserObj.userid);
      Map<String,dynamic>sendmap=getDataMap(map,WebCommand.payidQuery);
      String rec=await httpFchatserver(sendmap);
      RecObj robj=RecObj(rec);
@@ -137,4 +144,9 @@ class WebPayUtil{
    }
 
 
+}
+
+class VerifyPayObj{
+   String payid="";
+   bool ispay=false;
 }

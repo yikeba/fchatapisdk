@@ -376,4 +376,41 @@ class FileArrObj {
   }
 }
 
-enum FileMD { base, assets, image, video, product, tmporder,order, payorder,other }
+//enum FileMD { base, assets, image, video, product, tmporder,order, payorder,other }
+
+
+abstract class FileMD {
+  final String name;
+  const FileMD(this.name);
+
+  static const FileMD base = _DefaultFileMD('base');
+  static const FileMD assets = _DefaultFileMD('assets');
+  static const FileMD image = _DefaultFileMD('image');
+  static const FileMD video = _DefaultFileMD('video');
+  static const FileMD product = _DefaultFileMD('product');
+  static const FileMD tmporder = _DefaultFileMD('tmporder');
+  static const FileMD order = _DefaultFileMD('order');
+  static const FileMD payorder = _DefaultFileMD('payorder');
+  static const FileMD other = _DefaultFileMD('other');
+
+  static const List<FileMD> values = [
+    base, assets, image, video, product, tmporder, order, payorder, other
+  ];
+
+  @override
+  String toString() => name;
+}
+
+// 内部默认实现，防止外部直接实例化
+class _DefaultFileMD extends FileMD {
+  const _DefaultFileMD(String name) : super(name);
+}
+
+// 客户可以继承 FileMD 并扩展
+class CustomFileMD extends FileMD {
+  const CustomFileMD(String name) : super(name);
+
+  static const FileMD logs = CustomFileMD('logs');
+}
+
+

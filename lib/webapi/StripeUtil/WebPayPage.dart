@@ -2,6 +2,7 @@
 import 'package:fchatapi/Util/JsonUtil.dart';
 import 'package:fchatapi/WidgetUtil/CheckWidget.dart';
 import 'package:fchatapi/util/Tools.dart';
+import 'package:fchatapi/util/Translate.dart';
 import 'package:fchatapi/webapi/Bank/ABA_KH.dart';
 import 'package:fchatapi/webapi/StripeUtil/CookieStorage.dart';
 import 'package:fchatapi/webapi/StripeUtil/WebPayUtil.dart';
@@ -140,8 +141,8 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
               vertical: 12,
             ),
           ),
-          child: const Text(
-            '点击去ABA银行支付',
+          child: Text(
+            Translate.show('去ABA银行支付'),
             style: TextStyle(fontSize: 15, color: Colors.white),
           ),
         ),
@@ -319,28 +320,48 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
     widget.cardobj!.isCvvFocused = creditCardModel.isCvvFocused;
   }
 
+  Future<bool> watiAba(String payid) async {
+    await Future.delayed(const Duration(seconds: 30));
+    int index=0;
+    for (;;) {
+      await Future.delayed(const Duration(milliseconds: 2000));
+      index++;
+      bool ispay=await WebPayUtil.isQuery_payID(payid);
+      if(ispay) return true;
+      if(index>120){
+         return false;
+      }
+    }
+  }
+
   Future<PayHtmlObj?> pay() async {
     if(widget.pobj!=null) {
-      widget.pobj!.creatPayorder();
-      if(isaba) {
-        await ABA_KH.ABApayweb(widget.pobj!.money, widget.pobj!.payid);
-        String url="${widget.pobj!.probj!.returnurl}&payid=${widget.pobj!.payid}";
-        Tools.openChrome(url);
+      bool ispayorder=await widget.pobj!.creatPayorder();
+      //Tools.showSnackbar(context, Translate.show("创建完毕支付流水点"));
+      if(ispayorder) {
+        if (isaba) {
+          bool isopen = await ABA_KH.abapayweb(context,widget.pobj!.money, widget.pobj!.payid);
+          Tools.showSnackbar(context, Translate.show("打开aba应用进行支付"));
+          if (isopen) {
+            bool ispaystatus=await watiAba(widget.pobj!.payid);
+            if(ispaystatus) {
+              String url = "${widget.pobj!.probj!.returnurl}&payid=${widget
+                  .pobj!.payid}";
+              await Tools.openChrome(url);
+            }else{
+              return null;
+            }
+          } else {
+           _showSnackbar(Translate.show("打开ABA银行失败"));
+          }
+        } else {
+          AutoWaitWidget.autoStrProgress("正在跳转到银行卡支付", context);
+          StripeUrlObj stripeurl = await getStripPayUrl();
+          AutoWaitWidget.closeProgress();
+          Tools.openChrome(stripeurl.url);
+        }
       }else{
-        AutoWaitWidget.autoStrProgress("正在跳转到银行卡支付", context);
-        StripeUrlObj stripeurl=await getStripPayUrl();
-        AutoWaitWidget.closeProgress();
-        Tools.openChrome(stripeurl.url);
-       /* print("银行卡卡号${widget.cardobj!.cardNumber}");
-        print("银行卡信息输入${widget.cardobj!.toJson()}");
-        if(isCardinput || widget.cardobj!.isCardInfoComplete()){
-          FChatApiSdk.loccard.saveCard(widget.cardobj!);  //保存本地cookie
-          _showSnackbar("银行卡输入完毕，发起支付等待服务器通知");
-          await CardPay().handlePayment(widget.pobj!, widget.cardobj!);
-        }else{
-          //print("银行卡信息没有输入完善${widget.cardobj!.toJson()}");
-          _showSnackbar("请输入完毕银行卡信息，在发起支付");
-        }*/
+        _showSnackbar(Translate.show("创建支付订单失败，请稍后再试"));
       }
     }
     return null;
@@ -362,7 +383,10 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
         map.putIfAbsent("phone", () => widget.pobj!.fChatAddress!.phone);
       }
       map.putIfAbsent("product", ()=> widget.pobj!.paystr);
-      map.putIfAbsent("amount", ()=> JsonUtil.getmoneyint(widget.pobj!.money));
+
+      int moneyint=JsonUtil.getmoneyint(widget.pobj!.money);
+      //PhoneUtil.applog("返回网络支付金额:${widget.pobj!.money},分金额${moneyint}");
+      map.putIfAbsent("amount", ()=> moneyint);
       if(stripeurl!=null){
         map.putIfAbsent("id", () => stripeurl!.customerId);
       }else {
@@ -377,7 +401,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
       RecObj robj=RecObj(rec);
       PhoneUtil.applog("返回网络支付参数$rec");
       stripeurl=StripeUrlObj(robj.json);
-      CookieStorage.saveToCookie("cardurl", stripeurl.toJson());  //保存本地cookie
+      //CookieStorage.saveToCookie("cardurl", stripeurl.toJson());  //保存本地cookie
       return StripeUrlObj(robj.json);
   }
 }
