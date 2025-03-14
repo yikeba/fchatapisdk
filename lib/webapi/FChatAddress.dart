@@ -1,3 +1,4 @@
+import '../WidgetUtil/MapScreen.dart';
 import '../util/JsonUtil.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -7,6 +8,7 @@ class FChatAddress{
   String phone="";
   String email="";
   String consumer="";
+  OsmAddress? osmAddress;
   FChatAddress();
 
   FChatAddress.dart(this.position,this.address);
@@ -20,7 +22,9 @@ class FChatAddress{
     if(map.containsKey("address"))address=map["address"];
     if(map.containsKey("email"))email=map["email"];
     if(map.containsKey("consumer"))consumer=map["consumer"];
+    if(map.containsKey("osmAddress"))osmAddress=OsmAddress.fromjson(map["osmAddress"]);
   }
+
   toJson(){
     Map map={};
     if(position!=null )map.putIfAbsent("position", ()=> position!.toJson());
@@ -28,6 +32,7 @@ class FChatAddress{
     map.putIfAbsent("address", ()=>address);
     map.putIfAbsent("email", ()=> email);
     map.putIfAbsent("consumer", ()=>consumer);
+    if(osmAddress!=null)  map.putIfAbsent("osmAddress", ()=>osmAddress!.toJson());
     return map;
   }
 

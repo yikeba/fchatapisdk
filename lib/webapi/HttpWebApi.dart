@@ -93,7 +93,7 @@ class HttpWebApi {
     try {
       String url = geturl();
       //PhoneUtil.applog("访问url:$url");
-      //String authHeader = 'Bearer ${UserObj.token}'; // 设置 Bearer Token
+     // String authHeader = 'Bearer ${UserObj.token}'; // 设置 Bearer Token
       String authHeader = 'Bearer ${WebCommand.sapplogin}'; // 设置 Bearer Token
       FormData senddata = FormData.fromMap(_logindata());
       Future<Response> dio = Dio().post(
@@ -113,7 +113,7 @@ class HttpWebApi {
       return dio.then((value) {
         if (value.statusCode == 200) {
           RecObj robj=RecObj(value.data);
-          PhoneUtil.applog("fchat web api 验证返回类型：${robj.toString()},返回code${robj.code}返回原始数据${value.data}");
+          PhoneUtil.applog("fchat web api 验证返回类型：${robj.toString()},返回code${robj.code}返回原始数据${robj.data}");
          return robj;
         } else {
           PhoneUtil.applog("返回类型：${value.data}");
@@ -204,10 +204,14 @@ class RecObj{
       }
       //print("读取服务器返回对象$rec");
       state=true;
-      data=recservermap["data"];
-      json=JsonUtil.strtoMap(data);
-      listarr=JsonUtil.strotList(data);
-      databyte=Uint8List.fromList(json.toString().codeUnits);
+      if(recservermap.containsKey("data")) {
+        data = recservermap["data"];
+        json = JsonUtil.strtoMap(data);
+        listarr = JsonUtil.strotList(data);
+        databyte = Uint8List.fromList(json
+            .toString()
+            .codeUnits);
+      }
     }else{
       data="err";
     }

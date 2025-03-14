@@ -22,5 +22,7 @@ class WebCommand{
   static const String createWebPayUrl="createWebPayUrl";  //服务器创建stripe 跳转支付
   static const String verifyPay="verifyPay";  //验证支付是否成功
   static const String weblogin="weblogin";  //web扫码登录
+  static const String  chatService="chatService";  //更新服务号资料
+  static const String  autodeployapp="autodeployapp";  //自动部署web app
 
 }

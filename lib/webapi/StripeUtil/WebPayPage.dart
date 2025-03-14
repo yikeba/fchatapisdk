@@ -18,6 +18,7 @@ import '../PayHtmlObj.dart';
 import '../WebCommand.dart';
 import 'CardObj.dart';
 import 'LoadButton.dart';
+import 'dart:html' as html;
 
 class Webpaypage extends StatefulWidget {
   CardObj? cardobj;
@@ -54,7 +55,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
         width: 1,
       );
     }
-    if (widget.cardobj == null) {
+  /*  if (widget.cardobj == null) {
       String? cardinfo = CookieStorage.getCookie("fchat.card");
       if (cardinfo != null) {
         //PhoneUtil.applog("读取到本地cookie 数据$cardinfo");
@@ -66,7 +67,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
         widget.cardobj!.cardHolderName=widget.pobj!.fChatAddress!.consumer;
         PhoneUtil.applog("初始化赋予银行卡客户名称${widget.cardobj!.cardHolderName}");
       }
-    }
+    }*/
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       String stripekey=await WebPayUtil.readstripekey();
       Stripe.publishableKey=stripekey;
@@ -320,19 +321,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
     widget.cardobj!.isCvvFocused = creditCardModel.isCvvFocused;
   }
 
-  Future<bool> watiAba(String payid) async {
-    await Future.delayed(const Duration(seconds: 30));
-    int index=0;
-    for (;;) {
-      await Future.delayed(const Duration(milliseconds: 2000));
-      index++;
-      bool ispay=await WebPayUtil.isQuery_payID(payid);
-      if(ispay) return true;
-      if(index>120){
-         return false;
-      }
-    }
-  }
+
 
   Future<PayHtmlObj?> pay() async {
     if(widget.pobj!=null) {
@@ -341,16 +330,16 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
       if(ispayorder) {
         if (isaba) {
           bool isopen = await ABA_KH.abapayweb(context,widget.pobj!.money, widget.pobj!.payid);
-          Tools.showSnackbar(context, Translate.show("打开aba应用进行支付"));
+          //Tools.showSnackbar(context, Translate.show("打开aba应用进行支付"));
           if (isopen) {
-            bool ispaystatus=await watiAba(widget.pobj!.payid);
-            if(ispaystatus) {
+            //bool ispaystatus=await watiAba(widget.pobj!.payid);
+            //if(ispaystatus) {
               String url = "${widget.pobj!.probj!.returnurl}&payid=${widget
                   .pobj!.payid}";
               await Tools.openChrome(url);
-            }else{
-              return null;
-            }
+           // }else{
+            //  return null;
+           // }
           } else {
            _showSnackbar(Translate.show("打开ABA银行失败"));
           }
@@ -358,7 +347,11 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
           AutoWaitWidget.autoStrProgress("正在跳转到银行卡支付", context);
           StripeUrlObj stripeurl = await getStripPayUrl();
           AutoWaitWidget.closeProgress();
-          Tools.openChrome(stripeurl.url);
+          if(WebUtil.isSafari()){
+            html.window.location.href = stripeurl.url;
+          }else{
+            Tools.openChrome(stripeurl.url);
+          }
         }
       }else{
         _showSnackbar(Translate.show("创建支付订单失败，请稍后再试"));

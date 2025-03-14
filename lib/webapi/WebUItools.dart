@@ -3,6 +3,7 @@ import 'package:fchatapi/webapi/FChatAddress.dart';
 import 'package:fchatapi/webapi/StripeUtil/WebPay.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../WidgetUtil/MapScreen.dart';
 import 'PayHtmlObj.dart';
 import 'StripeUtil/CardListWidget.dart';
 import 'StripeUtil/WebPayPage.dart';
@@ -29,9 +30,20 @@ class WebUItools{
       MaterialPageRoute(
         builder: (context) {
           //return WebpayScreen(cardobj: null,order: order,pobj:pobj);
-          return Weblogin(onloginstate: (bool state) {
+          return Weblogin(onloginstate: (Map state) {
 
           },);
+        },
+      ),
+    );
+  }
+
+  static openMap(BuildContext context) {
+    return Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return SelectLocationPage();
         },
       ),
     );

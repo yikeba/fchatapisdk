@@ -27,6 +27,7 @@ class FChatApiSdk {
         webcall(true);
         _readgroupid();
       } else {
+        PhoneUtil.applog("服务号鉴权失败");
         webcall(false);
       }
     });

@@ -283,9 +283,9 @@ class TitleMenuLanguage extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black, // 背景色（可根据需求调整）
+                color: Colors.white, // 背景色（可根据需求调整）
                 borderRadius: BorderRadius.circular(8), // 圆角边框
-                border: Border.all(color: Colors.white, width: 1.5), // 白色边框
+                border: Border.all(color: Colors.black, width: 1.5), // 白色边框
               ),
               padding: const EdgeInsets.symmetric(horizontal: 5), // 让边框和内容有间距
               child: LanguagePickerDropdown(
