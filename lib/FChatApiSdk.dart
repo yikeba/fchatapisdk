@@ -1,3 +1,4 @@
+import 'package:fchatapi/util/DeviceInfo.dart';
 import 'package:fchatapi/util/PhoneUtil.dart';
 import 'package:fchatapi/util/Translate.dart';
 import 'package:fchatapi/util/UserObj.dart';
@@ -22,6 +23,7 @@ class FChatApiSdk {
     UserObj.token = token;
     UserObj.userid = userid;
     UserObj.appname=appname;
+
     HttpWebApi.weblogin().then((value) {
       if (value.data == "loginok") {
         webcall(true);

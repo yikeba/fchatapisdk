@@ -10,7 +10,6 @@ import 'package:fchatapi/webapi/WebUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import '../../FChatApiSdk.dart';
 import '../../WidgetUtil/AutoWaitWidget.dart';
 import '../../util/PhoneUtil.dart';
 import '../HttpWebApi.dart';

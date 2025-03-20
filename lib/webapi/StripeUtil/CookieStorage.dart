@@ -1,7 +1,5 @@
 
-import 'dart:html' as html;
-
-import '../../util/PhoneUtil.dart';
+import 'package:universal_html/html.dart' as html;
 
 class CookieStorage {
 

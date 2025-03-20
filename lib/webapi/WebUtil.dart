@@ -8,6 +8,9 @@ import 'package:flutter/services.dart';
 import '../Util/JsonUtil.dart';
 
 class WebUtil {
+  static String city="";
+
+
   static bool isMobileiBrowser() {
     final userAgent = html.window.navigator.userAgent.toLowerCase();
     return userAgent.contains('mobile') ||

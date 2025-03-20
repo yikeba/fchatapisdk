@@ -9,6 +9,8 @@ import 'dart:js' as js;
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../util/OsmAddress.dart';
+
 class SelectLocationPage extends StatefulWidget {
   Position? position;
   final Function(LatLng, String)? onLocationSelected; // 选择后回调
@@ -272,25 +274,3 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
 }
 
 
-class OsmAddress{
-  String province ="";
-  String city = "";
-  String district = "";
-  String address="";
-  OsmAddress(this.province,this.city,this.district,this.address);
-  OsmAddress.fromjson(Map map){
-    province=map["province"];
-    city=map["ciyt"];
-    district=map["district"];
-    address=map["address"];
-  }
-  toJson(){
-    Map map={};
-    map.putIfAbsent("province", ()=> province);
-    map.putIfAbsent("city", ()=> city);
-    map.putIfAbsent("district", ()=> district);
-    map.putIfAbsent("address", ()=>address);
-    return map;
-  }
-
-}

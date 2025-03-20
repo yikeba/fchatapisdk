@@ -8,7 +8,10 @@ import 'package:flutter/foundation.dart';
 import '../util/JsonUtil.dart';
 import '../util/PhoneUtil.dart';
 import '../util/SignUtil.dart';
-import 'dart:html' as html;
+//import 'dart:html' as html;
+import 'package:universal_html/html.dart' as html;
+
+import 'WebUtil.dart';
 
 class HttpWebApi {
   static Future<String> postServerForm(String url, Map<String, dynamic> post,
@@ -187,6 +190,7 @@ class RecObj{
   String rec;
   bool state=false;
   Uint8List? databyte;
+
   RecObj(this.rec){
     initjson();
   }
@@ -197,6 +201,9 @@ class RecObj{
     Map recservermap=JsonUtil.strtoMap(rec);
     if(recservermap.containsKey("code")){
       code=recservermap["code"];
+    }
+    if(recservermap.containsKey("city")){
+      WebUtil.city=recservermap["city"];
     }
     if(code==200){
       if(recservermap.containsKey("token")){
