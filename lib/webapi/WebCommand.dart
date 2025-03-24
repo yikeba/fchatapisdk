@@ -24,5 +24,7 @@ class WebCommand{
   static const String weblogin="weblogin";  //web扫码登录
   static const String  chatService="chatService";  //更新服务号资料
   static const String  autodeployapp="autodeployapp";  //自动部署web app
+  static const String  expresszto="expresszto";  //中通接口，创建订单
+  static const String  email="email";  //发送email
 
 }

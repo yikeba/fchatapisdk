@@ -85,11 +85,11 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
         );
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
-          if (data != null && data['display_name'] != null) {
+          if (data != null && data['address'] != null) {
             PhoneUtil.applog("http返回综合位置信息$data");
-            _parseOSMAddress(data);
+            _address = data['display_name'];
+            _parseOSMAddress(data['address']);
             setState(() {
-              _address = data['display_name'];
               setAddress();
             });
           }
@@ -113,7 +113,7 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
           if(mounted) {
             setState(() {
               _address = result;
-              _parseThaiAddress();
+              _parseAddress();
               setAddress();
             });
           }
@@ -122,9 +122,9 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
     }
   }
 
-  void _parseThaiAddress() {
+  void _parseAddress() {
     List<String> parts = _address.split(',').map((e) => e.trim()).toList();
-    parts.removeLast(); // 移除"泰国"
+    parts.removeLast();
     String province = parts.isNotEmpty ? parts.last : '未知省';
     parts.removeLast();
     String city = parts.isNotEmpty ? parts.last : '未知城市';
@@ -138,10 +138,15 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
   }
 
   void _parseOSMAddress(Map<String, dynamic> address) {
-    String province = address['state'] ?? '未知省份';
+    String province = address['state'] ?? address['province'] ?? '未知省份';
     String city = address['city'] ?? address['town'] ?? address['village'] ?? '未知城市';
-    String district = address['county'] ?? address['borough'] ?? address['suburb'] ?? '未知地区';
+    String district = address['county'] ?? address['borough'] ?? address['suburb'] ?? address["road"]??'未知地区';
+    String country=address["country"] ?? "";
+    String country_code=address["country_code"] ?? "";
     osmAddress=OsmAddress(province,city,district,_address);
+    if(country.isNotEmpty) osmAddress!.country=country;
+    if(country_code.isNotEmpty) osmAddress!.countryCode=country_code;
+
     setState(() {
       _address = "$province, $city, $district";
       setAddress();

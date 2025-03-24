@@ -1,6 +1,4 @@
 import 'dart:html' as html;
-import 'dart:js' as js;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

@@ -158,8 +158,7 @@ class FileObj {
   }
 
 
-  Future<void> writeData(
-      String data, String name, void Function(String state) upstate) async {
+  Future<void> writeData(String data, String name, void Function(String state) upstate) async {
     try {
       if (data.isEmpty) {
         print("无法读取文件内容");
