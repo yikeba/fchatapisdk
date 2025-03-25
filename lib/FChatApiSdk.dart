@@ -6,9 +6,11 @@ import 'package:fchatapi/webapi/FileObj.dart';
 import 'package:fchatapi/webapi/HttpWebApi.dart';
 import 'package:fchatapi/webapi/StripeUtil/CardArr.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_stripe_web/flutter_stripe_web.dart';
+import 'WidgetUtil/AuthWidget.dart';
 import 'appapi/BaseJS.dart';
 
 class FChatApiSdk {
@@ -17,8 +19,11 @@ class FChatApiSdk {
   static String griupid="";  //默认客户群聊
   static CardArr loccard=CardArr();
   static init(String userid, String token, void Function(bool state) webcall,
-      void Function(bool state) appcall,{String appname=""}) {
+      void Function(bool state) appcall,{String appname=""})  async {
     WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: FirebaseConfig.webConfig,  // 获取配置
+    );
     Translate.initTra();
     UserObj.token = token;
     UserObj.userid = userid;

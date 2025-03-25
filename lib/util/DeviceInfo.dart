@@ -79,6 +79,27 @@ class DeviceInfo {
     };
   }
 
+  static bool isMac() {
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    return userAgent.contains('macintosh') || userAgent.contains('mac os x');
+  }
+
+  static bool isIos() {
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    return userAgent.contains('iphone') || userAgent.contains('ipad') || userAgent.contains('ipod');
+  }
+
+  static bool isWindows() {
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    return userAgent.contains('windows');
+  }
+
+  static bool isAndroid() {
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    return userAgent.contains('android');
+  }
+
+
   @override
   String toString() => jsonEncode(toJson());
 }
