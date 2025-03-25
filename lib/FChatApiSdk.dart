@@ -8,6 +8,7 @@ import 'package:fchatapi/webapi/StripeUtil/CardArr.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_stripe_web/flutter_stripe_web.dart';
 import 'WidgetUtil/AuthWidget.dart';
@@ -21,9 +22,8 @@ class FChatApiSdk {
   static init(String userid, String token, void Function(bool state) webcall,
       void Function(bool state) appcall,{String appname=""})  async {
     WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-      options: FirebaseConfig.webConfig,  // 获取配置
-    );
+
+    initenv();
     Translate.initTra();
     UserObj.token = token;
     UserObj.userid = userid;
@@ -47,6 +47,23 @@ class FChatApiSdk {
     String rec=await HttpWebApi.httpspost(map);
     griupid=RecObj(rec).data;
     //PhoneUtil.applog("读取服务号默认客户群聊$griupid");
+  }
+
+  static initenv() async {
+    await dotenv.load(fileName: "packages/fchatapi/assets/.env");
+    FirebaseConfig.apiKey= dotenv.get('firebaseapiKey');
+    FirebaseConfig.authDomain=dotenv.get('firebaseapiKey');
+    FirebaseConfig.projectId=dotenv.get('firebaseprojectId');
+    FirebaseConfig.storageBucket= dotenv.get('firebasestorageBucket');
+    FirebaseConfig.messagingSenderId= dotenv.get('firebasemessagingSenderId');
+    FirebaseConfig.appId=dotenv.get('firebaseappId');
+    FirebaseConfig.measurementId= dotenv.get('firebasemeasurementId');
+    FirebaseConfig.clientId=dotenv.get('clientId');
+    FirebaseConfig.redirectUri=dotenv.get('redirectUri');
+    PhoneUtil.applog("firebase apikey:${FirebaseConfig.apiKey}");
+    await Firebase.initializeApp(
+      options: FirebaseConfig.webConfig,  // 获取配置
+    );
   }
 
   static Map<String,dynamic> _getgroupid(){

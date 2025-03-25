@@ -63,7 +63,7 @@ class AWSEmail{
      }
    }
 
-   Future<void> sendEmailWithHtml(String url) async {
+   Future<void> EmailWithHtml(String url) async {
      // 从 URL 加载 HTML 内容
      htmlBody = await _fetchHtmlContent(url);
 

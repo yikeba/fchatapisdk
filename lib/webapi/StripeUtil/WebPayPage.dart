@@ -142,7 +142,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
             ),
           ),
           child: Text(
-            Translate.show('去ABA银行支付'),
+            Translate.show('ABA银行支付'),
             style: TextStyle(fontSize: 15, color: Colors.white),
           ),
         ),
@@ -298,7 +298,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
                             padding: const EdgeInsets.all(15),
                             child: LoadingButton(
                               onPressed: pay,
-                              text: '支付',
+                              text: Translate.show('支付'),
                             )
                         )),
                     // 底部添加些空间
@@ -325,20 +325,15 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
   Future<PayHtmlObj?> pay() async {
     if(widget.pobj!=null) {
       bool ispayorder=await widget.pobj!.creatPayorder();
-      //Tools.showSnackbar(context, Translate.show("创建完毕支付流水点"));
       if(ispayorder) {
         if (isaba) {
           bool isopen = await ABA_KH.abapayweb(context,widget.pobj!.money, widget.pobj!.payid);
-          //Tools.showSnackbar(context, Translate.show("打开aba应用进行支付"));
           if (isopen) {
-            //bool ispaystatus=await watiAba(widget.pobj!.payid);
-            //if(ispaystatus) {
+
               String url = "${widget.pobj!.probj!.returnurl}&payid=${widget
                   .pobj!.payid}";
               await Tools.openChrome(url);
-           // }else{
-            //  return null;
-           // }
+
           } else {
            _showSnackbar(Translate.show("打开ABA银行失败"));
           }

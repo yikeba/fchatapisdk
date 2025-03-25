@@ -6,17 +6,20 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../Util/PhoneUtil.dart';
+import '../util/Translate.dart';
 
 class EmailAuthWidget extends StatefulWidget {
   final Function(String email) onLoginSuccess;
 
-  const EmailAuthWidget({Key? key, required this.onLoginSuccess}) : super(key: key);
+  const EmailAuthWidget({Key? key, required this.onLoginSuccess})
+      : super(key: key);
 
   @override
   _EmailAuthWidgetState createState() => _EmailAuthWidgetState();
 }
 
-class _EmailAuthWidgetState extends State<EmailAuthWidget> with SingleTickerProviderStateMixin {
+class _EmailAuthWidgetState extends State<EmailAuthWidget>
+    with SingleTickerProviderStateMixin {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? email;
   late TabController _tabController;
@@ -24,8 +27,9 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this); // 两个标签：Apple 和 Google
-    email = CookieStorage.getCookie("email") ?? "发送邮箱";
+    _tabController =
+        TabController(length: 2, vsync: this); // 两个标签：Apple 和 Google
+    email = CookieStorage.getCookie("email") ?? Translate.show("发送邮箱");
   }
 
   @override
@@ -61,8 +65,8 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> with SingleTickerProv
           AppleIDAuthorizationScopes.fullName,
         ],
         webAuthenticationOptions: WebAuthenticationOptions(
-          clientId: 'com.fchatservice.com',
-          redirectUri: Uri.parse('https://mall-31447.firebaseapp.com/__/auth/handler'),
+          clientId: FirebaseConfig.clientId,
+          redirectUri: Uri.parse(FirebaseConfig.redirectUri),
         ),
       );
 
@@ -78,7 +82,8 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> with SingleTickerProv
         PhoneUtil.applog("检测到现有用户，尝试重新认证或合并");
         await currentUser.reauthenticateWithCredential(oauthCredential);
       } else {
-        final userCredential = await _auth.signInWithCredential(oauthCredential);
+        final userCredential =
+            await _auth.signInWithCredential(oauthCredential);
         if (userCredential.user != null) {
           widget.onLoginSuccess(userCredential.user!.email ?? '');
           PhoneUtil.applog("Apple 登录成功: email=${userCredential.user!.email}");
@@ -103,13 +108,14 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> with SingleTickerProv
         title: const Text("登录失败"),
         content: Text(error),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("确定")),
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: const Text("确定")),
         ],
       ),
     );
   }
 
-  Widget getAuth(){
+  Widget getAuth() {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -122,7 +128,7 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> with SingleTickerProv
     );
   }
 
-  _getAuthIcon(){
+  _getAuthIcon() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -166,16 +172,27 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> with SingleTickerProv
             },
           ),
         ),
-        const SizedBox(height: 16), // 间距
+        const SizedBox(height: 5), // 间距
         // 下方提示文字
-        const Text(
-          "请给我设备发送订单邮件",
+        InkWell(
+          onTap: (){
+            signLogin();
+          },
+            child: Text(
+          email!,
           style: TextStyle(fontSize: 16, color: Colors.black54),
-        ),
+        )),
       ],
     );
   }
 
+  signLogin(){
+    if(DeviceInfo.isIos() || DeviceInfo.isMac()){
+      _signInWithApple(); // 点击 Apple 标签触发登录
+    }else{
+      _signInWithGoogle(); // 点击 Google 标签触发登录
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return getAuth();
@@ -183,15 +200,27 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget> with SingleTickerProv
 }
 
 class FirebaseConfig {
+
+  static String apiKey="";
+  static String authDomain="";
+  static String projectId="";
+  static String storageBucket="";
+  static String messagingSenderId="";
+  static String appId="";
+  static String measurementId="";
+
+  static String clientId="";
+  static String redirectUri="";
+
   static FirebaseOptions get webConfig {
-    return const FirebaseOptions(
-      apiKey: "AIzaSyByJBQKGrfLKi2TD6gcjUOKYFQ_7LwYCZo",
-      authDomain: "mall-31447.firebaseapp.com",
-      projectId: "mall-31447",
-      storageBucket: "mall-31447.firebasestorage.app",
-      messagingSenderId: "1083324276915",
-      appId: "1:1083324276915:web:db7b5729ac853dc01510c6",
-      measurementId: "G-VG72GRSJQ4",
+    return  FirebaseOptions(
+      apiKey: apiKey,
+      authDomain: authDomain,
+      projectId: projectId,
+      storageBucket: storageBucket,
+      messagingSenderId: messagingSenderId,
+      appId: appId,
+      measurementId: measurementId,
     );
   }
 }
