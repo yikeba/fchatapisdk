@@ -1,4 +1,3 @@
-
 import 'package:fchatapi/Util/JsonUtil.dart';
 import 'package:fchatapi/WidgetUtil/CheckWidget.dart';
 import 'package:fchatapi/util/Tools.dart';
@@ -10,6 +9,7 @@ import 'package:fchatapi/webapi/WebUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import '../../WidgetUtil/AuthWidget.dart';
 import '../../WidgetUtil/AutoWaitWidget.dart';
 import '../../util/PhoneUtil.dart';
 import '../HttpWebApi.dart';
@@ -23,7 +23,8 @@ class Webpaypage extends StatefulWidget {
   CardObj? cardobj;
   Widget? order;
   PayHtmlObj? pobj;
-  Webpaypage({super.key, required this.cardobj, this.order,this.pobj});
+
+  Webpaypage({super.key, required this.cardobj, this.order, this.pobj});
 
   @override
   _WebhookPaymentScreenState createState() => _WebhookPaymentScreenState();
@@ -39,13 +40,16 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
   );
   double width = 512;
   double height = 0;
-  bool isCardinput=false;
-  bool isstripestate=false;
+  bool isCardinput = false;
+  bool isstripestate = false;
+  String? email = "";
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    email = CookieStorage.getCookie("email");
+    email ??= "";
     if (widget.order == null) {
       widget.order = const SizedBox(
         width: 1,
@@ -54,7 +58,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
         width: 1,
       );
     }
-  /*  if (widget.cardobj == null) {
+    /*  if (widget.cardobj == null) {
       String? cardinfo = CookieStorage.getCookie("fchat.card");
       if (cardinfo != null) {
         //PhoneUtil.applog("读取到本地cookie 数据$cardinfo");
@@ -68,16 +72,14 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
       }
     }*/
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      String stripekey=await WebPayUtil.readstripekey();
-      Stripe.publishableKey=stripekey;
+      String stripekey = await WebPayUtil.readstripekey();
+      Stripe.publishableKey = stripekey;
       Stripe.urlScheme = 'flutterstripe';
       await Stripe.instance.applySettings();
       await WebPayUtil.getWebcreateWebPaymentIntent(widget.pobj!);
 
-      isstripestate=true;
-
+      isstripestate = true;
     });
-
   }
 
   List initcards() {
@@ -93,7 +95,8 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
   String _getcardnum() {
     if (cardnumber.isNotEmpty) return "";
     if (widget.cardobj == null) return "";
-    if (widget.cardobj!.cardNumber.isNotEmpty) return widget.cardobj!.cardNumber;
+    if (widget.cardobj!.cardNumber.isNotEmpty)
+      return widget.cardobj!.cardNumber;
     return "";
   }
 
@@ -120,7 +123,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
   }
 
   _setABA() {
-    if(WebUtil.isMobileiBrowser()) {
+    if (WebUtil.isMobileiBrowser() && widget.pobj!.currency.toLowerCase()=="usd") {
       return Row(children: [
         // 产品图片
         const SizedBox(width: 20),
@@ -148,12 +151,14 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
         ),
         const SizedBox(width: 20),
       ]);
-    }else{
-      return SizedBox(width: 1,);
+    } else {
+      return SizedBox(
+        width: 1,
+      );
     }
   }
 
-  Widget _getCardInput(void Function(InputCard value) callCard){
+  Widget _getCardInput(void Function(InputCard value) callCard) {
     return Padding(
       padding: const EdgeInsets.only(left: 8),
       child: Row(
@@ -163,9 +168,10 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
     );
   }
 
-  InputCard inputCard=InputCard();
-  Widget old_getCardInput(void Function(InputCard value) callCard){
-    return  Container(
+  InputCard inputCard = InputCard();
+
+  Widget old_getCardInput(void Function(InputCard value) callCard) {
+    return Container(
       width: width,
       margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: CreditCardForm(
@@ -177,21 +183,20 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
         isHolderNameVisible: true,
         isCardNumberVisible: true,
         isExpiryDateVisible: true,
-        cardHolderName: widget.cardobj?.cardHolderName ?? widget.pobj!.fChatAddress!.consumer,
+        cardHolderName: widget.cardobj?.cardHolderName ??
+            widget.pobj!.fChatAddress!.consumer,
         expiryDate: widget.cardobj?.expiryDate ?? "",
         onFormComplete: () {
-          inputCard.state=true;
+          inputCard.state = true;
           callCard(inputCard);
-          print("收到信用卡完成通知");
+
         },
         inputConfiguration: InputConfiguration(
           cardNumberDecoration: InputDecoration(
             labelText: 'Card Numer',
             hintText: _getHetext(),
-            labelStyle: TextStyle(
-                fontSize: fontsize, color: Colors.white),
-            hintStyle: TextStyle(
-                fontSize: fontsize, color: Colors.white),
+            labelStyle: TextStyle(fontSize: fontsize, color: Colors.white),
+            hintStyle: TextStyle(fontSize: fontsize, color: Colors.white),
             contentPadding: EdgeInsets.symmetric(vertical: 10),
             suffixIconConstraints: BoxConstraints(minWidth: 70),
             suffix: Padding(
@@ -205,28 +210,22 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
           expiryDateDecoration: InputDecoration(
             labelText: 'Expired Date',
             hintText: 'XX/XX',
-            labelStyle: TextStyle(
-                fontSize: fontsize, color: Colors.white),
-            hintStyle: TextStyle(
-                fontSize: fontsize, color: Colors.white),
+            labelStyle: TextStyle(fontSize: fontsize, color: Colors.white),
+            hintStyle: TextStyle(fontSize: fontsize, color: Colors.white),
           ),
           cvvCodeDecoration: InputDecoration(
             labelText: 'CVV',
             hintText: 'XXX',
-            labelStyle: TextStyle(
-                fontSize: fontsize, color: Colors.white),
-            hintStyle: TextStyle(
-                fontSize: fontsize, color: Colors.white),
+            labelStyle: TextStyle(fontSize: fontsize, color: Colors.white),
+            hintStyle: TextStyle(fontSize: fontsize, color: Colors.white),
           ),
           cardHolderDecoration: InputDecoration(
             labelText: 'Card Holder',
-            labelStyle: TextStyle(
-                fontSize: fontsize, color: Colors.white),
-            hintStyle: TextStyle(
-                fontSize: fontsize, color: Colors.white),
+            labelStyle: TextStyle(fontSize: fontsize, color: Colors.white),
+            hintStyle: TextStyle(fontSize: fontsize, color: Colors.white),
           ),
         ),
-        onCreditCardModelChange: (CreditCardModel creditCardModel){
+        onCreditCardModelChange: (CreditCardModel creditCardModel) {
           //inputCard=InputCard(creditCardModel, false);
 
           callCard(inputCard);
@@ -234,8 +233,10 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
       ),
     );
   }
-  bool iscard=false;
-  bool isaba=false;
+
+  bool iscard = false;
+  bool isaba = false;
+
   @override
   Widget build(BuildContext context) {
     if (MediaQuery.of(context).size.width < 512) {
@@ -244,7 +245,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
     // height=MediaQuery.of(context).size.height;
     //PhoneUtil.applog("显示UI高度$height");
     return Scaffold(
-      //  appBar: AppBar(title: const Text("网页支付")),
+        //  appBar: AppBar(title: const Text("网页支付")),
         backgroundColor: Colors.transparent,
         body: Align(
             alignment: Alignment.topCenter, // 底部居中
@@ -257,24 +258,26 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
                   crossAxisAlignment: CrossAxisAlignment.start, // 水平居中
                   mainAxisAlignment: MainAxisAlignment.start, // 从上到下排列
                   children: [
-                    CheckTextWidget(key:ValueKey(Tools.generateRandomString(70)),initialValue: iscard, onChanged: (state){
-                      iscard=state;
-                      isaba=false;
-                      setState(() {
-
-                      });
-                    }, label:"信用卡/借记卡", child:_getCardInput((value){
-                      PhoneUtil.applog("信用卡输入完毕${value.creditCardModel}，完成状态${value.state}");
-                      if(value.state){
-
-                        isCardinput=value.state;
-                        return;
-                      }
-                      //onCreditCardModelChange(value.creditCardModel);
-
-                    })),
+                    CheckTextWidget(
+                        key: ValueKey(Tools.generateRandomString(70)),
+                        initialValue: iscard,
+                        onChanged: (state) {
+                          iscard = state;
+                          isaba = false;
+                          setState(() {});
+                        },
+                        label: Translate.show("信用卡/借记卡"),
+                        child: _getCardInput((value) {
+                          //PhoneUtil.applog(
+                             // "信用卡输入完毕${value.creditCardModel}，完成状态${value.state}");
+                          if (value.state) {
+                            isCardinput = value.state;
+                            return;
+                          }
+                          //onCreditCardModelChange(value.creditCardModel);
+                        })),
                     const SizedBox(height: 1),
-                    if (WebUtil.isMobileiBrowser())
+                    if (WebUtil.isMobileiBrowser() && widget.pobj!.currency=="USD")
                       CheckTextWidget(
                         key: ValueKey(Tools.generateRandomString(70)),
                         initialValue: isaba,
@@ -284,32 +287,38 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
                             iscard = false;
                           });
                         },
-                        label: "ABA银行",
+                        label: Translate.show("ABA银行"),
                         child: _setABA(),
                       ),
-                    const SizedBox(height: 3),
+                    //const SizedBox(height: 3),
+                    EmailAuthWidget(
+                        email: email!,
+                        onLoginSuccess: (email) {
+                          this.email = email;
+                          CookieStorage.saveToCookie("email", email);
+                          PhoneUtil.applog("保存cookIE email:$email");
+                        }),
                     widget.order!,
-                    const Spacer(),   // 占据剩余空间
+                    const Spacer(), // 占据剩余空间
                     Align(
                         alignment: Alignment.bottomCenter,
-                        child:Container(
+                        child: Container(
                             alignment: Alignment.center,
                             width: MediaQuery.of(context).size.width * 0.3,
                             padding: const EdgeInsets.all(15),
                             child: LoadingButton(
                               onPressed: pay,
                               text: Translate.show('支付'),
-                            )
-                        )),
+                            ))),
                     // 底部添加些空间
                     const SizedBox(height: 5),
                   ],
-                )
-            )));
+                ))));
   }
 
   void _showSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void onCreditCardModelChange(CreditCardModel creditCardModel) {
@@ -320,34 +329,35 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
     widget.cardobj!.isCvvFocused = creditCardModel.isCvvFocused;
   }
 
-
-
   Future<PayHtmlObj?> pay() async {
-    if(widget.pobj!=null) {
-      bool ispayorder=await widget.pobj!.creatPayorder();
-      if(ispayorder) {
+    if (widget.pobj != null) {
+      bool ispayorder = await widget.pobj!.creatPayorder();
+      if (ispayorder) {
         if (isaba) {
-          bool isopen = await ABA_KH.abapayweb(context,widget.pobj!.money, widget.pobj!.payid);
+          bool isopen = await ABA_KH.abapayweb(
+              context, widget.pobj!.money, widget.pobj!.payid);
           if (isopen) {
-
-              String url = "${widget.pobj!.probj!.returnurl}&payid=${widget
-                  .pobj!.payid}";
-              await Tools.openChrome(url);
-
+            String url =
+                "${widget.pobj!.probj!.returnurl}&payid=${widget.pobj!.payid}";
+            if (email!.isNotEmpty) {
+              String baseemail = JsonUtil.setbase64(email!);
+              url = url + "&email=$baseemail";
+            }
+            await Tools.openChrome(url);
           } else {
-           _showSnackbar(Translate.show("打开ABA银行失败"));
+            _showSnackbar(Translate.show("打开ABA银行失败"));
           }
         } else {
           AutoWaitWidget.autoStrProgress("正在跳转到银行卡支付", context);
           StripeUrlObj stripeurl = await getStripPayUrl();
           AutoWaitWidget.closeProgress();
-          if(WebUtil.isSafari()){
+          if (WebUtil.isSafari()) {
             html.window.location.href = stripeurl.url;
-          }else{
+          } else {
             Tools.openChrome(stripeurl.url);
           }
         }
-      }else{
+      } else {
         _showSnackbar(Translate.show("创建支付订单失败，请稍后再试"));
       }
     }
@@ -356,67 +366,72 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
 
   getStripPayUrl() async {
     StripeUrlObj? stripeurl;
-      String? cardurl=CookieStorage.getCookie("cardurl");
-      if(cardurl!=null) {
-        if (cardurl.isNotEmpty) {
-           stripeurl=StripeUrlObj(JsonUtil.strtoMap(cardurl));
-           PhoneUtil.applog("返回网络支付参数$stripeurl");
-        }
+    String? cardurl = CookieStorage.getCookie("cardurl");
+    if (cardurl != null) {
+      if (cardurl.isNotEmpty) {
+        stripeurl = StripeUrlObj(JsonUtil.strtoMap(cardurl));
+        PhoneUtil.applog("返回网络支付参数$stripeurl");
       }
-      Map map={};
-      if(stripeurl!=null) {
-        map.putIfAbsent("phone", () => stripeurl!.phone);
-      }else{
-        map.putIfAbsent("phone", () => widget.pobj!.fChatAddress!.phone);
-      }
-      map.putIfAbsent("product", ()=> widget.pobj!.paystr);
+    }
+    Map map = {};
+    if (stripeurl != null) {
+      map.putIfAbsent("phone", () => stripeurl!.phone);
+    } else {
+      map.putIfAbsent("phone", () => widget.pobj!.fChatAddress!.phone);
+    }
+    map.putIfAbsent("product", () => widget.pobj!.paystr);
 
-      int moneyint=JsonUtil.getmoneyint(widget.pobj!.money);
-      //PhoneUtil.applog("返回网络支付金额:${widget.pobj!.money},分金额${moneyint}");
-      map.putIfAbsent("amount", ()=> moneyint);
-      if(stripeurl!=null){
-        map.putIfAbsent("id", () => stripeurl!.customerId);
-      }else {
-        map.putIfAbsent("id", () => "");
-      }
-      map.putIfAbsent("surl", ()=> "${widget.pobj!.probj!.returnurl}&session_id={CHECKOUT_SESSION_ID}");
-      map.putIfAbsent("curl", ()=> widget.pobj!.probj!.locurl);
-      map.putIfAbsent("currency", ()=> "usd");
-      map.putIfAbsent("payid", ()=> widget.pobj!.payid);
-      Map<String,dynamic> sendmap= WebPayUtil.getDataMap(map,WebCommand.createWebPayUrl);
-      String rec=await  WebPayUtil.httpFchatserver(sendmap);
-      RecObj robj=RecObj(rec);
-      PhoneUtil.applog("返回网络支付参数$rec");
-      stripeurl=StripeUrlObj(robj.json);
-      //CookieStorage.saveToCookie("cardurl", stripeurl.toJson());  //保存本地cookie
-      return StripeUrlObj(robj.json);
+    int moneyint = JsonUtil.getmoneyint(widget.pobj!.money);
+    //PhoneUtil.applog("返回网络支付金额:${widget.pobj!.money},分金额${moneyint}");
+    map.putIfAbsent("amount", () => moneyint);
+    if (stripeurl != null) {
+      map.putIfAbsent("id", () => stripeurl!.customerId);
+    } else {
+      map.putIfAbsent("id", () => "");
+    }
+    String surl =
+        "${widget.pobj!.probj!.returnurl}&session_id={CHECKOUT_SESSION_ID}";
+    if (email!.isNotEmpty) {
+      String baseemail = JsonUtil.setbase64(email!);
+      surl = "$surl&email=$baseemail";
+    }
+    map.putIfAbsent("surl", () => surl);
+    map.putIfAbsent("curl", () => widget.pobj!.probj!.locurl);
+    map.putIfAbsent("currency", () => widget.pobj!.currency);
+    map.putIfAbsent("payid", () => widget.pobj!.payid);
+    Map<String, dynamic> sendmap = WebPayUtil.getDataMap(map, WebCommand.createWebPayUrl);
+    String rec = await WebPayUtil.httpFchatserver(sendmap);
+    RecObj robj = RecObj(rec);
+    PhoneUtil.applog("返回网络支付参数$rec");
+    stripeurl = StripeUrlObj(robj.json);
+
+    return StripeUrlObj(robj.json);
   }
 }
 
+class StripeUrlObj {
+  String url = "";
+  String customerId = "";
+  String phone = "";
 
-class StripeUrlObj{
-  String url="";
-  String customerId="";
-  String phone="";
-  StripeUrlObj(Map map){
-    url=map["url"];
-    customerId=map["id"];
-    phone=map["phone"];
+  StripeUrlObj(Map map) {
+    url = map["url"];
+    customerId = map["id"];
+    phone = map["phone"];
   }
 
-  String toJson(){
-    Map ret={};
-    ret.putIfAbsent("url", ()=>url);
-    ret.putIfAbsent("id",()=>customerId);
-    ret.putIfAbsent("phone", ()=>phone);
+  String toJson() {
+    Map ret = {};
+    ret.putIfAbsent("url", () => url);
+    ret.putIfAbsent("id", () => customerId);
+    ret.putIfAbsent("phone", () => phone);
     return JsonUtil.maptostr(ret);
   }
 }
 
-class InputCard{
+class InputCard {
   CreditCardModel? creditCardModel;
-  bool state=false;
+  bool state = false;
   CardFieldInputDetails? card;
 //InputCard(this.creditCardModel,this.state);
-
 }

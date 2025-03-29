@@ -52,7 +52,7 @@ class FChatApiSdk {
   static initenv() async {
     await dotenv.load(fileName: "packages/fchatapi/assets/.env");
     FirebaseConfig.apiKey= dotenv.get('firebaseapiKey');
-    FirebaseConfig.authDomain=dotenv.get('firebaseapiKey');
+    FirebaseConfig.authDomain=dotenv.get('firebaseauthDomain');
     FirebaseConfig.projectId=dotenv.get('firebaseprojectId');
     FirebaseConfig.storageBucket= dotenv.get('firebasestorageBucket');
     FirebaseConfig.messagingSenderId= dotenv.get('firebasemessagingSenderId');
@@ -60,10 +60,11 @@ class FChatApiSdk {
     FirebaseConfig.measurementId= dotenv.get('firebasemeasurementId');
     FirebaseConfig.clientId=dotenv.get('clientId');
     FirebaseConfig.redirectUri=dotenv.get('redirectUri');
-    PhoneUtil.applog("firebase apikey:${FirebaseConfig.apiKey}");
+
     await Firebase.initializeApp(
       options: FirebaseConfig.webConfig,  // 获取配置
     );
+    PhoneUtil.applog("firebase config:${FirebaseConfig.webConfig.toString()}");
   }
 
   static Map<String,dynamic> _getgroupid(){

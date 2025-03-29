@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:js' as js;
-
 import '../Util/PhoneUtil.dart';
 
 class OsmAddress {

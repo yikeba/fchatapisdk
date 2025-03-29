@@ -21,6 +21,7 @@ class PayHtmlObj{
   String paystr="";   //付款说明文字
   String payid="";
   int date=0;
+  String currency="USD";
   FChatAddress? fChatAddress;
   PayReturnObj? probj;
   String merchantorder="";   //服务号订单json str
@@ -45,6 +46,9 @@ class PayHtmlObj{
     }
     money=map["money"];
     date=map["date"];
+    if(map.containsKey("currency")){
+      currency=map["currency"];
+    }
   }
 
   getJson(){
@@ -54,6 +58,7 @@ class PayHtmlObj{
     map.putIfAbsent("payuserid", () => payuserid);
     map.putIfAbsent("payname", () => payname);
     map.putIfAbsent("money",()=>money);   //付款金额
+    map.putIfAbsent("currency", ()=> currency);
     if(recobj!=null) map.putIfAbsent("recobj", () => recobj!.getJson()); //="";  //收款人id
     map.putIfAbsent("paytype", () => paytype.toString()) ;  //PayType? paytype;   //付款行为（红包，转账，消费。。。）
     map.putIfAbsent("paystr", () => paystr);        //r="";   //付款说明文字

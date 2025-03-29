@@ -10,31 +10,31 @@ import '../util/Translate.dart';
 
 class EmailAuthWidget extends StatefulWidget {
   final Function(String email) onLoginSuccess;
+  String email;
 
-  const EmailAuthWidget({Key? key, required this.onLoginSuccess})
+  EmailAuthWidget({Key? key, required this.email, required this.onLoginSuccess})
       : super(key: key);
 
   @override
   _EmailAuthWidgetState createState() => _EmailAuthWidgetState();
 }
 
-class _EmailAuthWidgetState extends State<EmailAuthWidget>
-    with SingleTickerProviderStateMixin {
+class _EmailAuthWidgetState extends State<EmailAuthWidget> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? email;
-  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController =
-        TabController(length: 2, vsync: this); // 两个标签：Apple 和 Google
-    email = CookieStorage.getCookie("email") ?? Translate.show("发送邮箱");
+    if (widget.email.isNotEmpty) {
+      email = widget.email;
+    } else {
+      email = CookieStorage.getCookie("email") ?? Translate.show("发送邮箱");
+    }
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -70,7 +70,8 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget>
         ),
       );
 
-      PhoneUtil.applog("Apple 凭据获取成功: identityToken=${credential.identityToken}, authCode=${credential.authorizationCode}");
+      PhoneUtil.applog(
+          "Apple 凭据获取成功: identityToken=${credential.identityToken}, authCode=${credential.authorizationCode}");
 
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: credential.identityToken,
@@ -82,8 +83,7 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget>
         PhoneUtil.applog("检测到现有用户，尝试重新认证或合并");
         await currentUser.reauthenticateWithCredential(oauthCredential);
       } else {
-        final userCredential =
-            await _auth.signInWithCredential(oauthCredential);
+        final userCredential = await _auth.signInWithCredential(oauthCredential);
         if (userCredential.user != null) {
           widget.onLoginSuccess(userCredential.user!.email ?? '');
           PhoneUtil.applog("Apple 登录成功: email=${userCredential.user!.email}");
@@ -105,11 +105,13 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("登录失败"),
-        content: Text(error),
+        title: const Text("登录失败", style: TextStyle(fontSize: 18 * 0.9)),
+        content: Text(error, style: const TextStyle(fontSize: 14 * 0.9)),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text("确定")),
+            onPressed: () => Navigator.pop(context),
+            child: const Text("确定", style: TextStyle(fontSize: 14 * 0.9)),
+          ),
         ],
       ),
     );
@@ -118,81 +120,121 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget>
   Widget getAuth() {
     return Card(
       elevation: 4,
+      color: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.white, width: 1), // 直接在 Card 设置白色边框
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
+      child: Container(
+        padding: const EdgeInsets.all(4.0),
+        color: Colors.transparent,
         child: _getAuthIcon(),
       ),
     );
   }
 
-  _getAuthIcon() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // TabBar 包含 Apple 和 Google 图标
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.grey[200], // 背景色
-            borderRadius: BorderRadius.circular(8),
+  TextEditingController emailController = TextEditingController();
+
+  Widget _iniputEmail() {
+    if (email == Translate.show("发送邮箱")) {
+      return Expanded(
+        flex: 2, // 占 50% 宽度（flex 总和为 4，flex: 2 占 50%）
+        child: TextField(
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            hintText: 'Enter your email',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.email, size: 20, color: Colors.grey),
+            hintStyle: TextStyle(fontSize: 15, color: Colors.grey),
           ),
-          child: TabBar(
-            controller: _tabController,
-            indicatorColor: Colors.blue,
-            labelColor: Colors.blue,
-            unselectedLabelColor: Colors.black,
-            tabs: [
-              Tab(
-                icon: Image.asset(
-                  "assets/img/apple.png",
-                  width: 20,
-                  height: 20,
-                  package: 'fchatapi',
-                ), //
-                text: "Apple",
-              ),
-              Tab(
-                icon: Image.asset(
-                  "assets/img/google.png",
-                  width: 20,
-                  height: 20,
-                  package: 'fchatapi',
-                ), // Google 图标（网络图片）
-                text: "Google",
-              ),
-            ],
-            onTap: (index) {
-              if (index == 0) {
-                _signInWithApple(); // 点击 Apple 标签触发登录
-              } else if (index == 1) {
-                _signInWithGoogle(); // 点击 Google 标签触发登录
-              }
-            },
-          ),
-        ),
-        const SizedBox(height: 5), // 间距
-        // 下方提示文字
-        InkWell(
-          onTap: (){
-            signLogin();
+          style: const TextStyle(fontSize: 16 * 0.9, color: Colors.grey),
+          onChanged: (value) {
+            PhoneUtil.applog("输入的内容：$value");
+            if (RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+              widget.onLoginSuccess(value);
+              email = value;
+              CookieStorage.saveToCookie("email", value);
+            }
           },
-            child: Text(
+        ),
+      );
+
+    } else {
+      return Expanded(
+        flex: 2, // 占 50% 宽度
+        child: Text(
           email!,
-          style: TextStyle(fontSize: 16, color: Colors.black54),
-        )),
+          style: const TextStyle(fontSize: 16 * 0.9, color: Colors.black54),
+        ),
+      );
+    }
+  }
+
+  Widget _getAuthIcon() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        // Apple 登录按钮（只显示 logo）
+        if (widget.email.isEmpty) ...[
+          const SizedBox(width: 10,),
+          Container(
+            width: 40 * 0.8, // 按钮宽度缩小 20%
+            height: 40 * 0.8, // 按钮高度缩小 20%
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(8 * 0.8),
+              border: Border.all(color: Colors.grey),
+            ),
+            child: IconButton(
+              onPressed: _signInWithApple,
+              icon: Image.asset(
+                "assets/img/apple.png",
+                width: 20 , // 图标大小缩小 20%
+                height: 20 ,
+                package: 'fchatapi',
+              ),
+              color: Colors.white,
+            ),
+          ),
+          // Google 登录按钮（只显示 logo）
+          const SizedBox(width: 10,),
+          Container(
+            width: 40 * 0.8,
+            height: 40 * 0.8,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(8 * 0.8),
+              border: Border.all(color: Colors.grey),
+            ),
+            child: IconButton(
+              onPressed: _signInWithGoogle,
+              icon: Image.asset(
+                "assets/img/google.png",
+                width: 20 ,
+                height: 20 ,
+                package: 'fchatapi',
+              ),
+            ),
+          ),
+        ],
+        SizedBox(width: 15,),
+        // 输入邮箱
+        _iniputEmail(),
+        const SizedBox(width: 10,),
       ],
     );
   }
 
-  signLogin(){
-    if(DeviceInfo.isIos() || DeviceInfo.isMac()){
-      _signInWithApple(); // 点击 Apple 标签触发登录
-    }else{
-      _signInWithGoogle(); // 点击 Google 标签触发登录
+  signLogin() {
+    if (widget.email.isNotEmpty) return;
+    if (DeviceInfo.isIos() || DeviceInfo.isMac()) {
+      _signInWithApple();
+    } else {
+      _signInWithGoogle();
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return getAuth();
@@ -200,20 +242,19 @@ class _EmailAuthWidgetState extends State<EmailAuthWidget>
 }
 
 class FirebaseConfig {
+  static String apiKey = "";
+  static String authDomain = "";
+  static String projectId = "";
+  static String storageBucket = "";
+  static String messagingSenderId = "";
+  static String appId = "";
+  static String measurementId = "";
 
-  static String apiKey="";
-  static String authDomain="";
-  static String projectId="";
-  static String storageBucket="";
-  static String messagingSenderId="";
-  static String appId="";
-  static String measurementId="";
-
-  static String clientId="";
-  static String redirectUri="";
+  static String clientId = "";
+  static String redirectUri = "";
 
   static FirebaseOptions get webConfig {
-    return  FirebaseOptions(
+    return FirebaseOptions(
       apiKey: apiKey,
       authDomain: authDomain,
       projectId: projectId,
