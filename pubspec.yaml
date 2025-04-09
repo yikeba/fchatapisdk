@@ -57,6 +57,7 @@ flutter:
   assets:
     - assets/img/
     - assets/pay/
+    - assets/json/zto.json
     - assets/.env
 
   plugin:

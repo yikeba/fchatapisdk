@@ -1,3 +1,5 @@
+import 'package:fchatapi/Express/ZtoApi.dart';
+import 'package:fchatapi/Util/JsonUtil.dart';
 import 'package:fchatapi/util/DeviceInfo.dart';
 import 'package:fchatapi/util/PhoneUtil.dart';
 import 'package:fchatapi/util/Translate.dart';
@@ -8,6 +10,7 @@ import 'package:fchatapi/webapi/StripeUtil/CardArr.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_stripe_web/flutter_stripe_web.dart';
@@ -28,7 +31,7 @@ class FChatApiSdk {
     UserObj.token = token;
     UserObj.userid = userid;
     UserObj.appname=appname;
-
+    _readApiJson();
     HttpWebApi.weblogin().then((value) {
       if (value.data == "loginok") {
         webcall(true);
@@ -47,6 +50,19 @@ class FChatApiSdk {
     String rec=await HttpWebApi.httpspost(map);
     griupid=RecObj(rec).data;
     //PhoneUtil.applog("读取服务号默认客户群聊$griupid");
+  }
+
+  static _readApiJson() async {
+    try {
+      String content = await rootBundle.loadString('packages/fchatapi/assets/json/zto.json');
+      content=content.trim();
+      content=content.replaceAll(r'\', '');
+      Map map=JsonUtil.strtoMap(content);
+      ZtoApi.initZtoObj(map["data"]);
+      //PhoneUtil.applog("中通配置地理位置字典文件内容：${ZtoApi.ztoLocJson}");
+    } catch (e) {
+      PhoneUtil.applog("中通配置地理位置字典文件读取失败: $e");
+    }
   }
 
   static initenv() async {

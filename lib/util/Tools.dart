@@ -163,6 +163,10 @@ class Tools {
   }
 
 
+  static bool containsNonEnglish(String input) {
+    final regex = RegExp(r'[^a-zA-Z\s]');
+    return regex.hasMatch(input);
+  }
 
   static openChrome(String _url) async {
     try {

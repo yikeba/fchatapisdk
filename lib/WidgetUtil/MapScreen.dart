@@ -80,8 +80,13 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
       try {
         // 备选方案：使用OpenStreetMap API
         final response = await http.get(
-            Uri.parse('https://nominatim.openstreetmap.org/reverse?format=json&lat=${location.latitude}&lon=${location.longitude}&zoom=18&addressdetails=1'),
-            headers: {'Accept': 'application/json', 'User-Agent': 'Flutter App'}
+          Uri.parse(
+            'https://nominatim.openstreetmap.org/reverse?format=json&lat=${location.latitude}&lon=${location.longitude}&zoom=18&addressdetails=1',
+          ),
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Flutter App',
+          },
         );
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
@@ -138,11 +143,12 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
   }
 
   void _parseOSMAddress(Map<String, dynamic> address) {
-    String province = address['state'] ?? address['province'] ?? '未知省份';
-    String city = address['city'] ?? address['town'] ?? address['village'] ?? '未知城市';
-    String district = address['county'] ?? address['borough'] ?? address['suburb'] ?? address["road"]??'未知地区';
+    String province = address['state'] ?? address['province'] ?? '';
+    String city = address['city'] ?? '';
+    String district = address['county'] ?? address['borough'] ?? address['suburb'] ?? address['town'] ?? address['village'] ??'';
     String country=address["country"] ?? "";
     String country_code=address["country_code"] ?? "";
+    if(city.isEmpty) city=province;
     osmAddress=OsmAddress(province,city,district,_address);
     if(country.isNotEmpty) osmAddress!.country=country;
     if(country_code.isNotEmpty) osmAddress!.countryCode=country_code;
