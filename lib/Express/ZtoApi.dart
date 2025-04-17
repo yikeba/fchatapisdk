@@ -1,22 +1,70 @@
+import 'package:fchatapi/Util/JsonUtil.dart';
+
 import '../Util/PhoneUtil.dart';
 import '../util/Translate.dart';
 import '../webapi/HttpWebApi.dart';
 import '../webapi/StripeUtil/WebPayUtil.dart';
 import '../webapi/WebCommand.dart';
+import 'ZtotrackWidget.dart';
 
 class ZtoApi {
   static ZtoKHObj ztoobj = ZtoKHObj();
 
-  static ztocreatorder(String data) async {
+  static Future<Map> ztocreatorder(String data) async {
     Map map = {};
     map.putIfAbsent("data", () => data);
     map.putIfAbsent("express", () => "zto");
+    map.putIfAbsent("action", ()=> "creat");
     Map<String, dynamic> sendmap =
         WebPayUtil.getDataMap(map, WebCommand.expresszto);
     String rec = await WebPayUtil.httpFchatserver(sendmap);
     RecObj robj = RecObj(rec);
-    PhoneUtil.applog("快递返回情况${robj.json}");
+   //PhoneUtil.applog("快递返回情况${robj.json}");
     return robj.json;
+  }
+
+
+  static Future<Map> ztoreadorder(String data) async {
+    Map map = {};
+    map.putIfAbsent("data", () => data);
+    map.putIfAbsent("express", () => "zto");
+    map.putIfAbsent("action", ()=> "read");
+    Map<String, dynamic> sendmap =
+    WebPayUtil.getDataMap(map, WebCommand.expresszto);
+    String rec = await WebPayUtil.httpFchatserver(sendmap);
+    RecObj robj = RecObj(rec);
+    PhoneUtil.applog("读取快递单${robj.json}");
+    return robj.json;
+  }
+
+   //读取中通快递单轨迹数据
+  static Future<List<ZtoTrackObj>> fetchztoreadtrack(String customerNO) async {
+     List<ZtoTrackObj> arr=[];
+     if(customerNO.isEmpty) return arr;
+     Map map={};
+     map.putIfAbsent("customerNO", () => customerNO);
+     List recstr=await ztoreadtrack(JsonUtil.maptostr(map));
+     List recobj=[];
+     for(String str in recstr){
+        Map map=JsonUtil.strtoMap(str);
+        recobj.add(map);
+     }
+     arr=recobj.map((item) => ZtoTrackObj.fromJson(item)).toList();
+     PhoneUtil.applog("读取到支付轨迹记录${arr.length}");
+     return arr;
+  }
+
+  static Future<List> ztoreadtrack(String data) async {
+    Map map = {};
+    map.putIfAbsent("data", () => data);
+    map.putIfAbsent("express", () => "zto");
+    map.putIfAbsent("action", ()=> "track");
+    Map<String, dynamic> sendmap =
+    WebPayUtil.getDataMap(map, WebCommand.expresszto);
+    String rec = await WebPayUtil.httpFchatserver(sendmap);
+    RecObj robj = RecObj(rec);
+    PhoneUtil.applog("读取快递单进度估计${robj.listarr}");
+    return robj.listarr;
   }
 
   static initZtoObj(Map map) {
@@ -24,8 +72,7 @@ class ZtoApi {
   }
 }
 
-class ZtoKhObj {
-}
+
 
 class provinceObj{
   String name;
