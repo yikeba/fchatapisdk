@@ -62,7 +62,9 @@ class _applogin extends State<Weblogin> {
       if (!recobj.json.containsKey("userid")) continue;
       ChatUserobj user = ChatUserobj.withNameAndAge(recobj.json);
       if (user.chatuser != null) {
-        if (user.chatuser!.id.isNotEmpty && !widget.isMerchant) {
+        widget.onloginstate(recobj.json);
+        break;
+        /*if (user.chatuser!.id.isNotEmpty && !widget.isMerchant) {
           widget.onloginstate(recobj.json);
           break;
         }
@@ -72,7 +74,7 @@ class _applogin extends State<Weblogin> {
           _showSnackbar("账户没有权限登录");
           isstate = false;
           widget.onloginstate({});
-        }
+        }*/
         break;
       }
     }

@@ -4,9 +4,11 @@ import 'package:fchatapi/util/DeviceInfo.dart';
 import 'package:fchatapi/util/PhoneUtil.dart';
 import 'package:fchatapi/util/Translate.dart';
 import 'package:fchatapi/util/UserObj.dart';
+import 'package:fchatapi/webapi/ChatUserobj.dart';
 import 'package:fchatapi/webapi/FileObj.dart';
 import 'package:fchatapi/webapi/HttpWebApi.dart';
 import 'package:fchatapi/webapi/StripeUtil/CardArr.dart';
+import 'package:fchatapi/webapi/StripeUtil/WebPayUtil.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -65,6 +67,23 @@ class FChatApiSdk {
     }
   }
 
+
+  static Future<ChatUserobj?> searchCHATid<T>(String id) async {
+    //本地查询好友结果
+    String userid = id;
+    Map map = {};
+    map.putIfAbsent("userid", () => userid);
+    final value = await WebPayUtil.getDataMap(map, WebCommand.searchCHATid);
+    final rec=await WebPayUtil.httpFchatserver(value);
+    RecObj recobj =RecObj(rec);
+    PhoneUtil.applog("返回用户信息${recobj.json}");
+    if(recobj.json.isNotEmpty) {
+      return ChatUserobj.withNameAndAge(recobj.json);
+    }
+    return null;
+
+  }
+
   static initenv() async {
     await dotenv.load(fileName: "packages/fchatapi/assets/.env");
     FirebaseConfig.apiKey= dotenv.get('firebaseapiKey');
@@ -80,7 +99,7 @@ class FChatApiSdk {
     await Firebase.initializeApp(
       options: FirebaseConfig.webConfig,  // 获取配置
     );
-    PhoneUtil.applog("firebase config:${FirebaseConfig.webConfig.toString()}");
+    //PhoneUtil.applog("firebase config:${FirebaseConfig.webConfig.toString()}");
   }
 
   static Map<String,dynamic> _getgroupid(){

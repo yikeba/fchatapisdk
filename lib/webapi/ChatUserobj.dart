@@ -209,7 +209,7 @@ class ChatUserobj {
     if (map.containsKey("username")) {
       name = map["username"];
     }
-    String imgurl = "";
+    String? imgurl = "";
     if (map.containsKey("imgurl")) {
       imgurl = map["imgurl"];
     }
