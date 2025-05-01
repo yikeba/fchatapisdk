@@ -1,3 +1,4 @@
+import 'package:fchatapi/Util/PhoneUtil.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -58,21 +59,31 @@ class WebUtil {
     return false;
   }
 
+  static bool isWecHAT(){
+    String str=getSocialMediaPlatform();
+    PhoneUtil.applog("社交应用环境$str");
+    if(str=="WeChat"){
+      return true;
+    }
+    return false;
+  }
+
   static String getSocialMediaPlatform() {
     final userAgent = html.window.navigator.userAgent.toLowerCase();
+    print("设备环境 userAgent: $userAgent");
 
     Map<String, String> socialMediaAgents = {
-      'fbav': 'Facebook', // Facebook App
-      'instagram': 'Instagram', // Instagram
-      'twitter': 'Twitter', // Twitter
-      'tiktok': 'TikTok', // TikTok
-      'snapchat': 'Snapchat', // Snapchat
-      'wechat': 'WeChat', // WeChat
-      'whatsapp': 'WhatsApp', // WhatsApp
-      'linkedin': 'LinkedIn', // LinkedIn
-      'pinterest': 'Pinterest', // Pinterest
-      'line': 'LINE', // LINE
-      'telegram': 'Telegram' // Telegram
+      'fbav': 'Facebook',        // Facebook App
+      'instagram': 'Instagram',  // Instagram
+      'twitter': 'Twitter',      // Twitter
+      'tiktok': 'TikTok',        // TikTok
+      'snapchat': 'Snapchat',    // Snapchat
+      'micromessenger': 'WeChat',// ✅ 正确匹配微信
+      'whatsapp': 'WhatsApp',    // WhatsApp
+      'linkedin': 'LinkedIn',    // LinkedIn
+      'pinterest': 'Pinterest',  // Pinterest
+      'line': 'LINE',            // LINE
+      'telegram': 'Telegram'     // Telegram
     };
 
     for (var entry in socialMediaAgents.entries) {
@@ -80,9 +91,9 @@ class WebUtil {
         return entry.value;
       }
     }
+
     return "";
   }
-
   static Map<String, dynamic> getotheruserDataMap(String userid,Map sendmap,String command) {
     Map<String, dynamic> map = {};
     map.putIfAbsent("userid", () => userid);

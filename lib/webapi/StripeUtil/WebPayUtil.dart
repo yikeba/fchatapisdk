@@ -27,7 +27,7 @@ class WebPayUtil{
        Map<String,dynamic>sendmap=getDataMap(map,WebCommand.payidQuery);
        String rec=await httpFchatserver(sendmap);
        RecObj robj=RecObj(rec);
-       PhoneUtil.applog("返回查询支付流水单状态$rec");
+      // PhoneUtil.applog("返回查询支付流水单状态$rec");
        if(robj.json.containsKey(payid) && robj.json.containsKey("status")){
           return robj.json["status"];
        }
@@ -52,7 +52,7 @@ class WebPayUtil{
        //PhoneUtil.applog("查询支付流水单id${robj.json["payid"]}");
        if(payid!.isEmpty) payid=robj.json["payid"];
      }else{
-       PhoneUtil.applog("没有返回支付流水id");
+       //PhoneUtil.applog("没有返回支付流水id");
      }
 
      verifyPayObj.payid=payid!;
@@ -70,14 +70,14 @@ class WebPayUtil{
      Map<String,dynamic>sendmap=getDataMap(map,WebCommand.payidQuery);
      String rec=await httpFchatserver(sendmap);
      RecObj robj=RecObj(rec);
-     PhoneUtil.applog("返回查询支付流水单状态$rec");
+    // PhoneUtil.applog("返回查询支付流水单状态$rec");
      return PayHtmlObj.fromJson(robj.json);
    }
    static readstripekey() async {
      Map<String,dynamic>sendmap=getDataMap({},WebCommand.readstripekey);
      String rec=await httpFchatserver(sendmap);
      RecObj robj=RecObj(rec);
-     PhoneUtil.applog("读取stripe key 参数${robj.data}");
+    // PhoneUtil.applog("读取stripe key 参数${robj.data}");
      return robj.data;
    }
 
@@ -88,7 +88,7 @@ class WebPayUtil{
      Map<String,dynamic>sendmap= getDataMap({},WebCommand.createWebPaymentIntent);
      String rec=await httpFchatserver(sendmap);
      RecObj robj=RecObj(rec);
-     PhoneUtil.applog("返回web 调用支付申请${robj.json}");
+    // PhoneUtil.applog("返回web 调用支付申请${robj.json}");
      return robj.json;
    }
 

@@ -6,6 +6,7 @@ import 'package:fchatapi/webapi/Bank/ABA_KH.dart';
 import 'package:fchatapi/webapi/StripeUtil/CookieStorage.dart';
 import 'package:fchatapi/webapi/StripeUtil/WebPayUtil.dart';
 import 'package:fchatapi/webapi/WebUtil.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -136,7 +137,11 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
         ),
         const Spacer(),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            isaba=true;
+            iscard=false;
+            pay();
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
             padding: const EdgeInsets.symmetric(
@@ -145,7 +150,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
             ),
           ),
           child: Text(
-            Translate.show('ABA银行支付'),
+            Translate.show('Select ABA Bank Pay'),
             style: TextStyle(fontSize: 15, color: Colors.white),
           ),
         ),
@@ -236,16 +241,20 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
 
   bool iscard = false;
   bool isaba = false;
-
+  String _getWecbat(){
+    String str="";
+    if(kDebugMode){
+      str=WebUtil.getSocialMediaPlatform();
+    }
+    return str;
+  }
   @override
   Widget build(BuildContext context) {
     if (MediaQuery.of(context).size.width < 512) {
       width = MediaQuery.of(context).size.width;
     }
-    // height=MediaQuery.of(context).size.height;
-    //PhoneUtil.applog("显示UI高度$height");
     return Scaffold(
-        //  appBar: AppBar(title: const Text("网页支付")),
+
         backgroundColor: Colors.transparent,
         body: Align(
             alignment: Alignment.topCenter, // 底部居中
@@ -268,16 +277,14 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
                         },
                         label: Translate.show("信用卡/借记卡"),
                         child: _getCardInput((value) {
-                          //PhoneUtil.applog(
-                             // "信用卡输入完毕${value.creditCardModel}，完成状态${value.state}");
-                          if (value.state) {
+                            if (value.state) {
                             isCardinput = value.state;
                             return;
                           }
                           //onCreditCardModelChange(value.creditCardModel);
                         })),
                     const SizedBox(height: 1),
-                    if (WebUtil.isMobileiBrowser() && widget.pobj!.currency=="USD")
+                    if (WebUtil.isMobileiBrowser() && widget.pobj!.currency=="USD" && !WebUtil.isWecHAT())
                       CheckTextWidget(
                         key: ValueKey(Tools.generateRandomString(70)),
                         initialValue: isaba,
@@ -287,7 +294,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
                             iscard = false;
                           });
                         },
-                        label: Translate.show("ABA银行"),
+                        label: Translate.show("ABA银行   ${_getWecbat()}"),
                         child: _setABA(),
                       ),
                     //const SizedBox(height: 3),
@@ -308,7 +315,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
                             padding: const EdgeInsets.all(15),
                             child: LoadingButton(
                               onPressed: pay,
-                              text: Translate.show('支付'),
+                              text: Translate.show('Payment'),
                             ))),
                     // 底部添加些空间
                     const SizedBox(height: 5),
@@ -348,7 +355,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
             _showSnackbar(Translate.show("打开ABA银行失败"));
           }
         } else {
-          AutoWaitWidget.autoStrProgress("正在跳转到银行卡支付", context);
+          AutoWaitWidget.autoStrProgress(Translate.show("正在跳转到银行卡支付"), context);
           StripeUrlObj stripeurl = await getStripPayUrl();
           AutoWaitWidget.closeProgress();
           if (WebUtil.isSafari()) {
@@ -370,7 +377,6 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
     if (cardurl != null) {
       if (cardurl.isNotEmpty) {
         stripeurl = StripeUrlObj(JsonUtil.strtoMap(cardurl));
-        PhoneUtil.applog("返回网络支付参数$stripeurl");
       }
     }
     Map map = {};
@@ -402,7 +408,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
     Map<String, dynamic> sendmap = WebPayUtil.getDataMap(map, WebCommand.createWebPayUrl);
     String rec = await WebPayUtil.httpFchatserver(sendmap);
     RecObj robj = RecObj(rec);
-    PhoneUtil.applog("返回网络支付参数$rec");
+    //PhoneUtil.applog("返回网络支付参数$rec");
     stripeurl = StripeUrlObj(robj.json);
 
     return StripeUrlObj(robj.json);

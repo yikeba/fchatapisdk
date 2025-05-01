@@ -1,11 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:fchatapi/util/Tools.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:html' as html;
-import 'dart:js' as js;
-
+import 'package:universal_html/html.dart' as html;
 import '../../util/JsonUtil.dart';
 import '../../util/PhoneUtil.dart';
 import '../../util/UserObj.dart';
@@ -19,6 +17,7 @@ class ABA_KH{
   //这事是打开aba app 区分android ios打开
   static Future<bool> openpayaba(BuildContext context,Map abamap) async {
     if (abamap.isEmpty) return false;
+   // return await AppLauncherUtil.openPayAba(context, abamap);
     String _url = abamap["abapay_deeplink"];
     if (!WebUtil.isMobileiBrowser()) {
       _url = abamap["qrString"];
@@ -104,5 +103,75 @@ class ABA_KH{
     return isopenaba;
   }
 
+}
+
+
+
+class AppLauncherUtil {
+  /// 打开 ABA App，支持微信拦截判断 + fallback 跳转 + PC 兼容
+  static Future<bool> openPayAba(BuildContext context, Map abamap) async {
+    if (abamap.isEmpty) return false;
+
+    // 判断是否为微信内打开
+    final isWeChat = html.window.navigator.userAgent.toLowerCase().contains("micromessenger");
+    final isMobile = WebUtil.isMobileiBrowser();
+
+    // 非手机设备，使用二维码 URL（一般是 PC）
+    String deeplinkUrl = abamap["abapay_deeplink"];
+    String fallbackUrl = abamap["qrString"] ?? abamap["abapay_fallback"];
+
+    if (!isMobile && fallbackUrl != null) {
+      html.window.location.href = fallbackUrl;
+      return false;
+    }
+
+    if (isWeChat) {
+      _showWeChatDialog(context);
+      return false;
+    }
+
+    try {
+      final success = await launchUrl(Uri.parse(deeplinkUrl), mode: LaunchMode.externalApplication);
+
+      // 如果系统未报错但无法打开，可用定时 fallback
+      _handlePossibleFailure(deeplinkUrl, fallbackUrl);
+      return success;
+    } catch (e) {
+      print("打开 ABA App 失败: $e");
+      Tools.showSnackbar(context, "打开aba bank 出错: $e");
+      return false;
+    }
+  }
+
+  /// fallback 判断机制：如果 App 未安装，1 秒后跳转 fallbackUrl
+  static void _handlePossibleFailure(String deeplinkUrl, String fallbackUrl) {
+    final int before = DateTime.now().millisecondsSinceEpoch;
+
+    html.window.location.href = deeplinkUrl;
+
+    Future.delayed(const Duration(seconds: 1), () {
+      final int after = DateTime.now().millisecondsSinceEpoch;
+      if (after - before < 1500 && fallbackUrl.isNotEmpty) {
+        html.window.location.href = fallbackUrl;
+      }
+    });
+  }
+
+  /// 微信中提示用户“用浏览器打开”
+  static void _showWeChatDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("提示"),
+        content: const Text("微信内无法打开 ABA Bank App。\n请点击右上角菜单，选择『在浏览器中打开』后再试。"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("我知道了"),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
