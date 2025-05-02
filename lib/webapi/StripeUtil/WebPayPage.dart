@@ -140,7 +140,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
           onPressed: () {
             isaba=true;
             iscard=false;
-            pay();
+            payment();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
@@ -314,7 +314,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
                             width: MediaQuery.of(context).size.width * 0.3,
                             padding: const EdgeInsets.all(15),
                             child: LoadingButton(
-                              onPressed: pay,
+                              onPressed: payment,
                               text: Translate.show('Payment'),
                             ))),
                     // 底部添加些空间
@@ -336,21 +336,20 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
     widget.cardobj!.isCvvFocused = creditCardModel.isCvvFocused;
   }
 
-  Future<PayHtmlObj?> pay() async {
+  Future<PayHtmlObj?> payment() async {
     if (widget.pobj != null) {
       bool ispayorder = await widget.pobj!.creatPayorder();
       if (ispayorder) {
         if (isaba) {
-          bool isopen = await ABA_KH.abapayweb(
-              context, widget.pobj!.money, widget.pobj!.payid);
+          bool isopen = await ABA_KH.abapayweb(context, widget.pobj!.money, widget.pobj!.payid);
           if (isopen) {
-            String url =
-                "${widget.pobj!.probj!.returnurl}&payid=${widget.pobj!.payid}";
+            String url = "${widget.pobj!.probj!.returnurl}&payid=${widget.pobj!.payid}";
             if (email!.isNotEmpty) {
               String baseemail = JsonUtil.setbase64(email!);
               url = url + "&email=$baseemail";
             }
-            await Tools.openChrome(url);
+            //await Tools.openChrome(url);
+            html.window.location.href = url;
           } else {
             _showSnackbar(Translate.show("打开ABA银行失败"));
           }

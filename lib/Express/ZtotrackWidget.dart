@@ -1,9 +1,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '../Util/PhoneUtil.dart';
-
+import 'package:fchatapi/util/Translate.dart';
 
 class ExpressTimeline extends StatelessWidget {
   final List<ZtoTrackObj> data;
@@ -17,8 +16,7 @@ class ExpressTimeline extends StatelessWidget {
 
   Widget getExpressid(){
     if(customerNo.isEmpty) {
-      return Text(
-        '订单号：$customerNo',
+      return Text(Translate.show('订单号')+'：$customerNo',
         style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,

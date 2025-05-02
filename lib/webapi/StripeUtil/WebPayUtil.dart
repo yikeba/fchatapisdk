@@ -49,12 +49,10 @@ class WebPayUtil{
      String rec=await httpFchatserver(sendmap);
      RecObj robj=RecObj(rec);
      if(robj.json.containsKey("payid")){
-       //PhoneUtil.applog("查询支付流水单id${robj.json["payid"]}");
        if(payid!.isEmpty) payid=robj.json["payid"];
      }else{
-       //PhoneUtil.applog("没有返回支付流水id");
+       return verifyPayObj;
      }
-
      verifyPayObj.payid=payid!;
      verifyPayObj.ispay=false;
      if(robj.json.containsKey("status")){

@@ -11,6 +11,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 
 import '../../FChatApiSdk.dart';
 import '../../util/PhoneUtil.dart';
+import '../../util/Translate.dart';
 import '../PayHtmlObj.dart';
 import 'CardObj.dart';
 import 'LoadButton.dart';
@@ -242,7 +243,7 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
                            setState(() {
 
                            });
-                        }, label:"信用卡/借记卡", child:_getCardInput((value){
+                        }, label: Translate.show("Credit/Debit Card"), child:_getCardInput((value){
                             PhoneUtil.applog("信用卡输入完毕${value.creditCardModel}，完成状态${value.state}");
                             if(value.state){
 
@@ -259,7 +260,7 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
                            setState(() {
 
                            });
-                        }, label:"ABA银行", child:_setABA(),),
+                        }, label:"ABA Bank", child:_setABA(),),
                         const SizedBox(height: 3),
                         widget.order!,
                         const Spacer(),   // 占据剩余空间
@@ -271,7 +272,7 @@ class _WebhookPaymentScreenState extends State<WebpayScreen> {
                             padding: const EdgeInsets.all(15),
                             child: LoadingButton(
                               onPressed: pay,
-                              text: '支付',
+                              text: 'Payment',
                             )
                         )),
                         // 底部添加些空间

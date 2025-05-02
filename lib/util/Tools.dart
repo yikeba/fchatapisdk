@@ -171,7 +171,7 @@ class Tools {
   static openChrome(String _url) async {
     try {
       var rec = await launch(_url);
-      print("打开正确，返回：$rec打开的链接:$_url");
+      PhoneUtil.applog("打开正确，返回：$rec打开的链接:$_url");
     } catch (e) {
       print("打开错误，打开下载页面");
       return await launch(_url);

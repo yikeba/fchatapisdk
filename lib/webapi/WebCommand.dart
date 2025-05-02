@@ -27,4 +27,9 @@ class WebCommand{
   static const String  expresszto="expresszto";  //中通接口，创建订单
   static const String  email="email";  //发送email
   static const String  searchCHATid="searchCHATid";  //返回用户基本信息
+  static const String  moneymanagement="moneymanagement";  //资金管理读取服务号资金
+
+
+
+
 }

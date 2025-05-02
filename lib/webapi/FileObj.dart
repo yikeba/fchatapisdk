@@ -281,7 +281,8 @@ class FileObj {
       String data = RecObj(rec).data;
       filedata(data);
     } catch (e) {
-      PhoneUtil.applog("读取文件过程中出现错误: $e");
+      filedata("err");
+      //PhoneUtil.applog("读取文件过程中出现错误: $e");
     }
   }
 
