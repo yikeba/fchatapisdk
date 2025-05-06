@@ -120,8 +120,16 @@ class ZtoKHObj {
   List<cityObj> citylist = [];
   init(Map map) {
     List plist = map["provinceList"];
+    plist.sort((a, b) {
+      // 提取 code 中的数字部分并转为整数
+      int numA = int.parse(RegExp(r'\d+').firstMatch(a['code'])!.group(0)!);
+      int numB = int.parse(RegExp(r'\d+').firstMatch(b['code'])!.group(0)!);
+      return numA.compareTo(numB);
+    });
     for (Map map in plist) {
+      String code=map["code"];
       String name = _cleanInput(_decodeBrokenUnicode(map["name"]));
+     // PhoneUtil.applog("获得province省份名称$name,省级单位排序code$code");
       String nameen = "";
       String namekh ="";
       if (map.containsKey("nameEn")) {
