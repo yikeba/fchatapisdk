@@ -14,6 +14,7 @@ enum ApiName {
   gps, //位置信息
   localstorage, //存储接口，客户端本地存储和s3
   readstorage, //读取文件
+  sendurl
 }
 
 class ApiObj{
