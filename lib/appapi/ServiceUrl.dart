@@ -5,7 +5,10 @@ import 'FChatApiObj.dart';
 class ServiceUrl{
   ApiObj? aobj;
   String url;
-  ServiceUrl(this.url);
+  String title;
+  String videoUrl="";
+  String price="";
+  ServiceUrl(this.url,this.title);
   send(void Function(String recdata) fchatsend){
     if(url.isEmpty) return;
     aobj=ApiObj(ApiName.sendurl,(value){
@@ -17,6 +20,9 @@ class ServiceUrl{
   _getJson(){
     Map map={};
     map.putIfAbsent("url", ()=> url);
+    map.putIfAbsent("title", ()=> title);
+    map.putIfAbsent("video", ()=> videoUrl);
+    map.putIfAbsent("price", ()=>price);
     return map;
   }
 

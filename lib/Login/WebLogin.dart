@@ -59,22 +59,11 @@ class _applogin extends State<Weblogin> {
           map, WebCommand.weblogin);
       String rec = await WebPayUtil.httpFchatserver(sendmap);
       RecObj recobj = RecObj(rec);
+      PhoneUtil.applog("扫码登录返回${recobj.rec}");
       if (!recobj.json.containsKey("userid")) continue;
       ChatUserobj user = ChatUserobj.withNameAndAge(recobj.json);
       if (user.chatuser != null) {
         widget.onloginstate(recobj.json);
-        break;
-        /*if (user.chatuser!.id.isNotEmpty && !widget.isMerchant) {
-          widget.onloginstate(recobj.json);
-          break;
-        }
-        if (user.chatuser!.id == UserObj.userid && widget.isMerchant) {
-          widget.onloginstate(recobj.json);
-        } else {
-          _showSnackbar("账户没有权限登录");
-          isstate = false;
-          widget.onloginstate({});
-        }*/
         break;
       }
     }

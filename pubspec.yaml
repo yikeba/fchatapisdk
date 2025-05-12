@@ -1,7 +1,7 @@
 name: fchatapi
 description: "fchatapi"
 version: 0.0.5
-homepage: "freechat.cloud"
+homepage: "fchat.us"
 
 environment:
   sdk: ^3.5.4

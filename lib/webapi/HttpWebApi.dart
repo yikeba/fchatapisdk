@@ -59,10 +59,13 @@ class HttpWebApi {
   static geturl() {
     if (kDebugMode) {
       return "https://www.freechat.cloud/sappbox";
+     // return "https://fchat.us/sappbox";
     } else {
       return "https://www.freechat.cloud/sapp";
+      //return "https://fchat.us/sapp";
     }
   }
+
 
   static String gethtmlurl() {
     if (kDebugMode) {
@@ -70,6 +73,7 @@ class HttpWebApi {
     } else {
       PhoneUtil.applog("返回url路径:${html.window.location.href}");
       return "https://www.freechat.cloud/${UserObj.userid}/";
+     // return "https://fchat.us/${UserObj.userid}/";
     }
   }
 
@@ -95,10 +99,9 @@ class HttpWebApi {
   static Future<RecObj> weblogin() async {
     try {
       String url = geturl();
-      //PhoneUtil.applog("访问url:$url");
-     // String authHeader = 'Bearer ${UserObj.token}'; // 设置 Bearer Token
       String authHeader = 'Bearer ${WebCommand.sapplogin}'; // 设置 Bearer Token
-      FormData senddata = FormData.fromMap(_logindata());
+      Map<String,dynamic> sendmmap=_logindata();
+      FormData senddata = FormData.fromMap(sendmmap);
       Future<Response> dio = Dio().post(
         url,
         data:senddata,
@@ -113,6 +116,7 @@ class HttpWebApi {
             } // 如果有 Token，则添加 Authorization
             ),
       );
+      PhoneUtil.applog("登录验证auth:$authHeader, 访问url$url, 上传form data$sendmmap");
       return dio.then((value) {
         if (value.statusCode == 200) {
           RecObj robj=RecObj(value.data);

@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
     userid = dotenv.get('userid');
     token = dotenv.get('token');
     FChatApiSdk.init(userid, token, (webstate) {
-      print("fchat web api 返回状态$webstate");
+      PhoneUtil.applog("fchat web api 返回状态$webstate");
     }, (appstate) {});
   }
 

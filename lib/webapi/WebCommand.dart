@@ -29,7 +29,7 @@ class WebCommand{
   static const String  searchCHATid="searchCHATid";  //返回用户基本信息
   static const String  moneymanagement="moneymanagement";  //资金管理读取服务号资金
 
-
+  static const String  shorturl="shorturl";  //，创建 short url
 
 
 }

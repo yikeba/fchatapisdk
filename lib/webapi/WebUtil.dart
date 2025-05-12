@@ -67,10 +67,20 @@ class WebUtil {
     }
     return false;
   }
+  static bool isFacebook(){
+    try {
+      final userAgent = html.window.navigator.userAgent.toLowerCase();
+      PhoneUtil.applog("设备环境 userAgent: $userAgent");
+      return userAgent.contains('fbav/') ? true : false;
+    } catch (e) {
+      PhoneUtil.applog("获取userAgent失败: $e");
+      return false;
+    }
+  }
 
   static String getSocialMediaPlatform() {
     final userAgent = html.window.navigator.userAgent.toLowerCase();
-    print("设备环境 userAgent: $userAgent");
+    PhoneUtil.applog("设备环境 userAgent: $userAgent");
 
     Map<String, String> socialMediaAgents = {
       'fbav': 'Facebook',        // Facebook App
