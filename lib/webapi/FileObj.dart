@@ -67,7 +67,7 @@ class FileObj {
     }
     map.putIfAbsent("md5", () => md5Hash);
     map.putIfAbsent("sapppath", () => filemd.name);
-    print("上传服务器文本map$map");
+    //print("上传服务器文本map$map");
     return map;
   }
 

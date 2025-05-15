@@ -18,7 +18,7 @@ import '../PayHtmlObj.dart';
 import '../WebCommand.dart';
 import 'CardObj.dart';
 import 'LoadButton.dart';
-import 'dart:html' as html;
+import 'package:universal_html/html.dart' as html;
 
 class Webpaypage extends StatefulWidget {
   CardObj? cardobj;
@@ -248,8 +248,88 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
     }
     return str;
   }
+
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width < 512
+        ? MediaQuery.of(context).size.width
+        : 512;
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          alignment: Alignment.topCenter,
+          color: Colors.blueGrey,
+          width: width,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                CheckTextWidget(
+                  key: ValueKey(Tools.generateRandomString(70)),
+                  initialValue: iscard,
+                  onChanged: (state) {
+                    iscard = state;
+                    isaba = false;
+                    setState(() {});
+                  },
+                  label: Translate.show("信用卡/借记卡"),
+                  child: _getCardInput((value) {
+                    isCardinput = value.state;
+                  }),
+                ),
+                const SizedBox(height: 1),
+                if (WebUtil.isMobileiBrowser() &&
+                    widget.pobj!.currency == "USD" &&
+                    !WebUtil.isWecHAT())
+                  CheckTextWidget(
+                    key: ValueKey(Tools.generateRandomString(70)),
+                    initialValue: isaba,
+                    onChanged: (state) {
+                      setState(() {
+                        isaba = state;
+                        iscard = false;
+                      });
+                    },
+                    label: Translate.show("ABA银行   ${_getWecbat()}"),
+                    child: _setABA(),
+                  ),
+                EmailAuthWidget(
+                  email: email!,
+                  onLoginSuccess: (email) {
+                    this.email = email;
+                    CookieStorage.saveToCookie("email", email);
+                    PhoneUtil.applog("保存cookIE email:$email");
+                  },
+                ),
+                widget.order!,
+                const SizedBox(height: 10), // 确保支付按钮有足够空间
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    padding: const EdgeInsets.all(15),
+                    child: LoadingButton(
+                      onPressed: payment,
+                      text: Translate.show('Payment'),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20), // 底部留白
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  @override
+  Widget _oldbuild(BuildContext context) {
     if (MediaQuery.of(context).size.width < 512) {
       width = MediaQuery.of(context).size.width;
     }

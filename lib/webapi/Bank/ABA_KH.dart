@@ -83,7 +83,7 @@ class ABA_KH{
     String data=JsonUtil.maptostr(sendmap);
     data=JsonUtil.setbase64(data);
     map.putIfAbsent("data", ()=>data);
-    print("上传服务器文本map$map");
+    //print("上传服务器文本map$map");
     return map;
   }
 

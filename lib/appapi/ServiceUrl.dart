@@ -8,6 +8,7 @@ class ServiceUrl{
   String title;
   String videoUrl="";
   String price="";
+  String image="";
   ServiceUrl(this.url,this.title);
   send(void Function(String recdata) fchatsend){
     if(url.isEmpty) return;
@@ -23,6 +24,7 @@ class ServiceUrl{
     map.putIfAbsent("title", ()=> title);
     map.putIfAbsent("video", ()=> videoUrl);
     map.putIfAbsent("price", ()=>price);
+    if(image.isNotEmpty) map.putIfAbsent("image", ()=>image);
     return map;
   }
 

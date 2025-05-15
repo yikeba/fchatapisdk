@@ -1,5 +1,6 @@
 import 'package:fchatapi/Express/ZtoApi.dart';
 import 'package:fchatapi/Util/JsonUtil.dart';
+import 'package:fchatapi/appapi/LoginFChat.dart';
 import 'package:fchatapi/util/DeviceInfo.dart';
 import 'package:fchatapi/util/PhoneUtil.dart';
 import 'package:fchatapi/util/Translate.dart';
@@ -14,8 +15,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:flutter_stripe_web/flutter_stripe_web.dart';
 import 'WidgetUtil/AuthWidget.dart';
 import 'appapi/BaseJS.dart';
 
@@ -24,10 +23,10 @@ class FChatApiSdk {
   static FileArrObj filearrobj = FileArrObj();
   static String griupid="";  //默认客户群聊
   static CardArr loccard=CardArr();
+  static bool isFchatBrower=false;  //是否在fchat app中运行
   static init(String userid, String token, void Function(bool state) webcall,
       void Function(bool state) appcall,{String appname=""})  async {
     WidgetsFlutterBinding.ensureInitialized();
-
     initenv();
     Translate.initTra();
     UserObj.token = token;
@@ -43,9 +42,18 @@ class FChatApiSdk {
         webcall(false);
       }
     });
-    BaseJS.apiRecdatainit();
+    BaseJS.apiRecdatainit();  //初始化app接口
+    Loginfchat().send((value){
+       if(value=="err") value="";
+       PhoneUtil.applog("返回Fchat 环境内容:$value");
+       if(value.isEmpty) {
+         appcall(false);
+       } else{
+         appcall(true);
+       }
+       isFchatBrower=value.isNotEmpty ? true : false;
+    });
     //服务器增加一个验证接口，初始化验证服务号是否上线，并判断采用url
-    //进行登陆服务器，获取临时访问token 加入https 安全访问
   }
   static _readgroupid() async {
     Map<String,dynamic> map=_getgroupid();

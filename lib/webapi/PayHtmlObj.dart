@@ -74,7 +74,7 @@ class PayHtmlObj{
     String data=JsonUtil.maptostr(getJson());
     data=JsonUtil.setbase64(data);
     map.putIfAbsent("data", ()=>data);
-    print("上传服务器文本map$map");
+    //print("上传服务器文本map$map");
     return map;
   }
 

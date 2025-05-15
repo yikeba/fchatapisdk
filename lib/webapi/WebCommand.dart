@@ -30,6 +30,7 @@ class WebCommand{
   static const String  moneymanagement="moneymanagement";  //资金管理读取服务号资金
 
   static const String  shorturl="shorturl";  //，创建 short url
+  static const String  sendmessage="sendmessage";  //，创建 short url
 
 
 }

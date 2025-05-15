@@ -14,7 +14,7 @@ class BaseJS{
       try {
         _fchatstream.add(message["data"]);
       }catch(e){
-        print("api err $e, message$message");
+        PhoneUtil.applog("Fchat api err $e, message$message");
       }
 
     });
