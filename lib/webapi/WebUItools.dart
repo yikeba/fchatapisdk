@@ -1,6 +1,7 @@
 import 'package:fchatapi/FChatApiSdk.dart';
 import 'package:fchatapi/Login/WebLogin.dart';
 import 'package:fchatapi/Util/JsonUtil.dart';
+import 'package:fchatapi/Util/PhoneUtil.dart';
 import 'package:fchatapi/webapi/FChatAddress.dart';
 import 'package:fchatapi/webapi/SendMessage.dart';
 import 'package:fchatapi/webapi/StripeUtil/WebPay.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../WidgetUtil/MapScreen.dart';
 import '../appapi/PayObj.dart';
+import '../appapi/SendOrder.dart';
 import 'PayHtmlObj.dart';
 import 'StripeUtil/CardListWidget.dart';
 import 'StripeUtil/WebPayPage.dart';
@@ -26,8 +28,11 @@ class WebUItools{
         String url = "${pobj.probj!.returnurl}&payid=$payid";
         html.window.location.href = url;
         //发送消息到客户服务号
-        String text="Orderid: $payid \r\n Procudt: ${pobj.paystr} \r\n Payment Amount: ${pobj.money} \r\n Order Url: $url";
-        SendMessage(payid).send(text);
+        Sendorder(payid,pobj.money,pobj.paystr,url).send((value){
+          PhoneUtil.applog("发送订单消息到app，收到回复$value");
+        });
+      /*  String text="Orderid: $payid \r\n Procudt: ${pobj.paystr} \r\n Payment Amount: ${pobj.money} \r\n Order Url: $url";
+        SendMessage(payid).send(text);*/
 
       });
     }else {

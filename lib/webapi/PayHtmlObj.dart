@@ -2,6 +2,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:fchatapi/util/JsonUtil.dart';
+import 'package:fchatapi/util/Tools.dart';
 import 'package:fchatapi/webapi/FChatAddress.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
 
@@ -29,13 +30,13 @@ class PayHtmlObj{
   PayHtmlObj(this.recobj,String phone,String name){
     payuserid=phone;
     payname=name;
-    payid=phone+DateUtil.getUTCint().toRadixString(32);
+    payid=Tools.generateRandomString(10)+DateUtil.getUTCint().toRadixString(32);
   }
   PayHtmlObj.dart(String userid,String phone,String name){
     recobj=ChatUserobj(userid, name, "", ChatUserUtil.chatUser);
     payuserid=phone;
     payname=name;
-    payid=phone+DateUtil.getUTCint().toRadixString(32);
+    payid=Tools.generateRandomString(10)+DateUtil.getUTCint().toRadixString(32);
 
   }
   PayHtmlObj.fromJson(Map map){

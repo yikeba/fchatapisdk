@@ -16,7 +16,6 @@ class BaseJS{
       }catch(e){
         PhoneUtil.applog("Fchat api err $e, message$message");
       }
-
     });
   }
 
