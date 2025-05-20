@@ -26,14 +26,12 @@ class WebUItools{
         Map recmap=JsonUtil.strtoMap(value);
         String payid=recmap["payid"];
         String url = "${pobj.probj!.returnurl}&payid=$payid";
+        PhoneUtil.applog("app支付回调通知，本地进行验证");
         html.window.location.href = url;
-        //发送消息到客户服务号
+        //发送消息到预定客户
         Sendorder(payid,pobj.money,pobj.paystr,url).send((value){
           PhoneUtil.applog("发送订单消息到app，收到回复$value");
         });
-      /*  String text="Orderid: $payid \r\n Procudt: ${pobj.paystr} \r\n Payment Amount: ${pobj.money} \r\n Order Url: $url";
-        SendMessage(payid).send(text);*/
-
       });
     }else {
       return Navigator.push(
