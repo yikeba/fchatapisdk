@@ -109,7 +109,7 @@ class ViewPro {
                           viewstr,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: UIxml.bestFontsize(11),
+                            fontSize: 12,
                           ),
                         ),
                       ),

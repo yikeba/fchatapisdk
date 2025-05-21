@@ -18,7 +18,7 @@ class ServiceUrl{
     aobj!.setData(toString());
   }
 
-  _getJson(){
+  toJson(){
     Map map={};
     map.putIfAbsent("url", ()=> url);
     map.putIfAbsent("title", ()=> title);
@@ -30,7 +30,7 @@ class ServiceUrl{
 
   @override
   String toString(){
-    return JsonUtil.maptostr(_getJson());
+    return JsonUtil.maptostr(toJson());
   }
 
 }
