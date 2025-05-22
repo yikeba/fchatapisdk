@@ -43,6 +43,7 @@ class WebPayUtil{
      sessionId ?? "";
      payid ?? "";
      Map map={};
+     //PhoneUtil.applog("发送服务器payid $payid");
      map.putIfAbsent("payid", ()=> payid);
      map.putIfAbsent("sessionid", ()=> sessionId);
      Map<String,dynamic>sendmap=getDataMap(map,WebCommand.verifyPay);

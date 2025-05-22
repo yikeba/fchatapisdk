@@ -26,7 +26,8 @@ class WebUItools{
         Map recmap=JsonUtil.strtoMap(value);
         String payid=recmap["payid"];
         String url = "${pobj.probj!.returnurl}&payid=$payid";
-        PhoneUtil.applog("app支付回调通知，本地进行验证");
+        PhoneUtil.applog("app支付回调通知，本地进行验证$payid");
+        PhoneUtil.applog("网页服务号验证支付url$url");
         html.window.location.href = url;
         //发送消息到预定客户
         Sendorder(payid,pobj.money,pobj.paystr,url).send((value){
