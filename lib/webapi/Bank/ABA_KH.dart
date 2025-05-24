@@ -92,13 +92,9 @@ class ABA_KH{
     Map map = {};
     map.putIfAbsent("amount", () => amount);
     map.putIfAbsent("payid", () => payid);
-   // map.putIfAbsent("return", () => "http://18.142.173.182:8080/aba");
     Map<String,dynamic> sendmap=_getDataMap(map);
-    //PhoneUtil.applog("提交服务器aba json:$sendmap");
     String rec = await _creatABAordert(sendmap);
-    //PhoneUtil.applog("aba服务器返回$rec");
     RecObj robj=RecObj(rec);
-    //PhoneUtil.applog("服务器发起aba支付调用${robj.json}");
     bool isopenaba=await openpayaba(context,robj.json);
     return isopenaba;
   }

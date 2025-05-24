@@ -1,7 +1,6 @@
 import 'package:fchatapi/Express/ZtoApi.dart';
 import 'package:fchatapi/Util/JsonUtil.dart';
 import 'package:fchatapi/appapi/LoginFChat.dart';
-import 'package:fchatapi/util/DeviceInfo.dart';
 import 'package:fchatapi/util/PhoneUtil.dart';
 import 'package:fchatapi/util/Translate.dart';
 import 'package:fchatapi/util/UserObj.dart';
@@ -11,12 +10,14 @@ import 'package:fchatapi/webapi/HttpWebApi.dart';
 import 'package:fchatapi/webapi/StripeUtil/CardArr.dart';
 import 'package:fchatapi/webapi/StripeUtil/WebPayUtil.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'WidgetUtil/AuthWidget.dart';
 import 'appapi/BaseJS.dart';
+
+// 顶部
+import 'src/web/WebFirebaseEnv_stub.dart'
+if (dart.library.html) 'src/web/WebFirebaseEnv.dart';
+
 
 class FChatApiSdk {
   static FileObj fileobj = FileObj();
@@ -27,7 +28,8 @@ class FChatApiSdk {
   static init(String userid, String token, void Function(bool state) webcall,
       void Function(bool state) appcall,{String appname=""})  async {
     WidgetsFlutterBinding.ensureInitialized();
-    initenv();
+    //initenv();
+    await WebFirebaseEnv.initenv();
     Translate.initTra();
     UserObj.token = token;
     UserObj.userid = userid;
@@ -92,7 +94,8 @@ class FChatApiSdk {
 
   }
 
-  static initenv() async {
+/*  static initenv() async {
+    if (!kIsWeb) return;
     await dotenv.load(fileName: "packages/fchatapi/assets/.env");
     FirebaseConfig.apiKey= dotenv.get('firebaseapiKey');
     FirebaseConfig.authDomain=dotenv.get('firebaseauthDomain');
@@ -103,12 +106,11 @@ class FChatApiSdk {
     FirebaseConfig.measurementId= dotenv.get('firebasemeasurementId');
     FirebaseConfig.clientId=dotenv.get('clientId');
     FirebaseConfig.redirectUri=dotenv.get('redirectUri');
-
     await Firebase.initializeApp(
       options: FirebaseConfig.webConfig,  // 获取配置
     );
     //PhoneUtil.applog("firebase config:${FirebaseConfig.webConfig.toString()}");
-  }
+  }*/
 
   static Map<String,dynamic> _getgroupid(){
     Map<String,dynamic> map = {};
