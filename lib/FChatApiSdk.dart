@@ -25,6 +25,9 @@ class FChatApiSdk {
   static String griupid="";  //默认客户群聊
   static CardArr loccard=CardArr();
   static bool isFchatBrower=false;  //是否在fchat app中运行
+  static String host="https://fchat.us/";
+  static String debughost="http://fchat.us/";
+
   static init(String userid, String token, void Function(bool state) webcall,
       void Function(bool state) appcall,{String appname=""})  async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -61,7 +64,7 @@ class FChatApiSdk {
     Map<String,dynamic> map=_getgroupid();
     String rec=await HttpWebApi.httpspost(map);
     griupid=RecObj(rec).data;
-    //PhoneUtil.applog("读取服务号默认客户群聊$griupid");
+    PhoneUtil.applog("读取服务号默认客户群聊$griupid");
   }
 
   static _readApiJson() async {

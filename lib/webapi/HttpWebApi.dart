@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:dio/dio.dart';
+import 'package:fchatapi/FChatApiSdk.dart';
 import 'package:fchatapi/util/Tools.dart';
 import 'package:fchatapi/util/UserObj.dart';
+import 'package:fchatapi/webapi/LoginVerfiy.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
 import 'package:flutter/foundation.dart';
 import '../util/JsonUtil.dart';
 import '../util/PhoneUtil.dart';
 import '../util/SignUtil.dart';
-//import 'dart:html' as html;
 import 'package:universal_html/html.dart' as html;
 
 import 'WebUtil.dart';
@@ -23,7 +24,6 @@ class HttpWebApi {
       if (token != null) {
         authHeader = 'Bearer $token'; // 设置 Bearer Token
       }
-
       // 创建 Dio 请求
       Future<Response> dio = Dio().post(
         url,
@@ -33,7 +33,6 @@ class HttpWebApi {
           receiveTimeout: const Duration(seconds: 30),
           method: "POST",
           contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-          // 设置 Content-Type
           headers: authHeader != null
               ? {"Authorization": authHeader} // 如果有 Token，则添加 Authorization 头
               : {},
@@ -58,11 +57,11 @@ class HttpWebApi {
 
   static geturl() {
     if (kDebugMode) {
-      return "https://www.freechat.cloud/sappbox";
-     // return "https://fchat.us/sappbox";
+      //return "https://www.freechat.cloud/sappbox";
+      return FChatApiSdk.debughost+"sappbox";
     } else {
-      return "https://www.freechat.cloud/sapp";
-      //return "https://fchat.us/sapp";
+      //return "https://www.freechat.cloud/sapp";
+      return FChatApiSdk.host+"sapp";
     }
   }
 
@@ -72,8 +71,7 @@ class HttpWebApi {
       return _getBaseUrl(html.window.location.href);
     } else {
       PhoneUtil.applog("返回url路径:${html.window.location.href}");
-      return "https://www.freechat.cloud/${UserObj.userid}/";
-     // return "https://fchat.us/${UserObj.userid}/";
+      return FChatApiSdk.host+"${UserObj.userid}/";
     }
   }
 
@@ -84,7 +82,7 @@ class HttpWebApi {
     return baseUrl.replaceAll(RegExp(r'/$'), '');
   }
 
-  static Map<String, dynamic> _logindata() {
+  static Map<String, dynamic> logindata() {
     Map<String, dynamic> map = {};
     map.putIfAbsent("userid", () => UserObj.userid);
     map.putIfAbsent("command", () => WebCommand.sapplogin);
@@ -95,12 +93,18 @@ class HttpWebApi {
     map.putIfAbsent("sign", () => sign);
     return map;
   }
+ /* static weblogin() async {
+    // Map map=await  _weblogin();
+    // PhoneUtil.applog("申请向服务器认证，返回$map");
+     bool islogin=await LoginVerify().loginAndVerify() ;
+     PhoneUtil.applog("登录验证返回$islogin");
+  }*/
 
   static Future<RecObj> weblogin() async {
     try {
       String url = geturl();
       String authHeader = 'Bearer ${WebCommand.sapplogin}'; // 设置 Bearer Token
-      Map<String,dynamic> sendmmap=_logindata();
+      Map<String,dynamic> sendmmap=logindata();
       FormData senddata = FormData.fromMap(sendmmap);
       Future<Response> dio = Dio().post(
         url,
@@ -121,7 +125,7 @@ class HttpWebApi {
         if (value.statusCode == 200) {
           RecObj robj=RecObj(value.data);
           PhoneUtil.applog("fchat web api 验证返回类型：${robj.toString()},返回code${robj.code}返回原始数据${robj.data}");
-         return robj;
+          return robj;
         } else {
           PhoneUtil.applog("返回类型：${value.data}");
         }
@@ -155,22 +159,26 @@ class HttpWebApi {
     return JsonUtil.maptostr(map);
   }
 
+  static Options buildRequestOptions({String? sessionId, String? authHeader}) {
+    final headers = <String, String>{
+      'Content-Type': 'multipart/form-data',
+    };
+    if (authHeader != null) {
+      headers['Authorization'] = authHeader;
+    }
+    return Options(headers: headers);
+  }
+
   static Future<String> httpspost(Map<String,dynamic> map) async {
     try {
       final Dio _dio = Dio();
       String authHeader = 'Bearer ${UserObj.servertoken}'; // 设置 Bearer Token
-      FormData formData = FormData.fromMap(map);
-      // 发送 POST 请求
+      FormData formData=FormData.fromMap(map); // 发送 POST 请求
       String url = HttpWebApi.geturl();
       Response response = await _dio.post(
         url,
         data: formData,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            "Authorization": authHeader
-          },
-        ),
+        options: buildRequestOptions(sessionId:UserObj.sessionid,authHeader: authHeader)
       );
       // 检查上传结果
       if (response.statusCode == 200) {
@@ -212,8 +220,12 @@ class RecObj{
     if(code==200){
       if(recservermap.containsKey("token")){
         UserObj.servertoken=recservermap["token"];
+        //PhoneUtil.applog("获得服务器返回安全token${UserObj.servertoken}");
       }
-      //print("读取服务器返回对象$rec");
+      if(recservermap.containsKey("sessionId")){
+        UserObj.sessionid=recservermap["sessionId"];
+        //PhoneUtil.applog("开发模式下获得服务器sessionID:${UserObj.sessionid}");
+      }
       state=true;
       if(recservermap.containsKey("data")) {
         data = recservermap["data"];
