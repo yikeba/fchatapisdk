@@ -71,7 +71,7 @@ class HttpWebApi {
       return _getBaseUrl(html.window.location.href);
     } else {
       PhoneUtil.applog("返回url路径:${html.window.location.href}");
-      return FChatApiSdk.host+"${UserObj.userid}/";
+      return FChatApiSdk.host+"app/${UserObj.userid}/";
     }
   }
 

@@ -10,8 +10,12 @@ import 'package:fchatapi/webapi/HttpWebApi.dart';
 import 'package:fchatapi/webapi/StripeUtil/CardArr.dart';
 import 'package:fchatapi/webapi/StripeUtil/WebPayUtil.dart';
 import 'package:fchatapi/webapi/WebCommand.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'WidgetUtil/AuthWidget.dart';
 import 'appapi/BaseJS.dart';
 
 // 顶部
@@ -31,8 +35,8 @@ class FChatApiSdk {
   static init(String userid, String token, void Function(bool state) webcall,
       void Function(bool state) appcall,{String appname=""})  async {
     WidgetsFlutterBinding.ensureInitialized();
-    //initenv();
-    await WebFirebaseEnv.initenv();
+    initenv();
+    //await WebFirebaseEnv.initenv();
     Translate.initTra();
     UserObj.token = token;
     UserObj.userid = userid;
@@ -97,7 +101,7 @@ class FChatApiSdk {
 
   }
 
-/*  static initenv() async {
+  static initenv() async {
     if (!kIsWeb) return;
     await dotenv.load(fileName: "packages/fchatapi/assets/.env");
     FirebaseConfig.apiKey= dotenv.get('firebaseapiKey');
@@ -113,7 +117,7 @@ class FChatApiSdk {
       options: FirebaseConfig.webConfig,  // 获取配置
     );
     //PhoneUtil.applog("firebase config:${FirebaseConfig.webConfig.toString()}");
-  }*/
+  }
 
   static Map<String,dynamic> _getgroupid(){
     Map<String,dynamic> map = {};

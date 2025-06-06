@@ -59,7 +59,7 @@ class _applogin extends State<Weblogin> {
           map, WebCommand.weblogin);
       String rec = await WebPayUtil.httpFchatserver(sendmap);
       RecObj recobj = RecObj(rec);
-      PhoneUtil.applog("扫码登录返回${recobj.rec}");
+      PhoneUtil.applog("扫码登录返回${recobj.data}");
       if (!recobj.json.containsKey("userid")) continue;
       ChatUserobj user = ChatUserobj.withNameAndAge(recobj.json);
       if (user.chatuser != null) {
