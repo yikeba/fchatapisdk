@@ -36,7 +36,7 @@ class FChatApiSdk {
       void Function(bool state) appcall,{String appname=""})  async {
     WidgetsFlutterBinding.ensureInitialized();
     initenv();
-    //await WebFirebaseEnv.initenv();
+    PhoneUtil.applog("链接域名$host  调试域名$debughost");
     Translate.initTra();
     UserObj.token = token;
     UserObj.userid = userid;

@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker_web/image_picker_web.dart';
-import 'dart:html' as html;
+import 'package:universal_html/html.dart' as html;
+
 void main() async {
   await dotenv.load();
   runApp(const MyApp());

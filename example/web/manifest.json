@@ -1,11 +1,11 @@
 {
-    "name": "fchatapi_example",
-    "short_name": "fchatapi_example",
+    "name": "chat",
+    "short_name": "chat",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Demonstrates how to use the fchatapi plugin.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

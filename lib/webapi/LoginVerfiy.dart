@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 
 import 'package:encrypt/encrypt.dart';
+import 'package:fchatapi/FChatApiSdk.dart';
 import 'package:fchatapi/webapi/HttpWebApi.dart';
 
 import '../Util/PhoneUtil.dart';
@@ -33,7 +34,7 @@ class LoginVerify {
   Future<bool> loginAndVerify() async {
     try {
       // 第一步：获取服务器的 RSA 公钥和 hmacSalt
-      String url = "https://fchat.us/sapplogin";
+      String url = "${FChatApiSdk.host}applogin";
       String authHeader = 'Bearer ${WebCommand.sapplogin}'; // 设置 Bearer Token
       Map<String,dynamic> sendmmap=HttpWebApi.logindata();
       FormData senddata = FormData.fromMap(sendmmap);
@@ -74,7 +75,7 @@ class LoginVerify {
 
       // 第二步：发送认证请求，Dio 自动附带 Cookie
       final verifyResp = await dio.post(
-        'https://fchat.us/sappToken',
+        '${FChatApiSdk.host}sappToken',
         options: Options(
           headers: {
             "Content-Type": "application/json",

@@ -8,7 +8,7 @@ class BaseJS{
 
 
   static apiRecdatainit(){
-    // 监听来自 Flutter App 的消息
+
     html.window.onMessage.listen((event) {
       final message = event.data;
       try {

@@ -7,6 +7,7 @@ import 'package:fchatapi/util/UserObj.dart';
 
 import '../util/PhoneUtil.dart';
 
+
 enum ApiName {
   system,
   userinfo, //用户信息
@@ -15,7 +16,8 @@ enum ApiName {
   localstorage, //存储接口，客户端本地存储和s3
   readstorage, //读取文件
   sendurl,
-  order    //服务号订单
+  order, //服务号订单
+  appport
 }
 
 class ApiObj{

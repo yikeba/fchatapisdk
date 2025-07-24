@@ -2,7 +2,7 @@
 
 fchatapi
 
-## Getting Started
+## fChat Api web
 
 This project is a starting point for a Flutter
 [plug-in package](https://flutter.dev/to/develop-plugins),

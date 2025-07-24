@@ -58,7 +58,10 @@ class HttpWebApi {
   static geturl() {
     if (kDebugMode) {
       //return "https://www.freechat.cloud/sappbox";
-      return FChatApiSdk.debughost+"sappbox";
+      //PhoneUtil.applog("开发模式登录验证");
+     // return FChatApiSdk.debughost+"sappbox";
+      String url="http://43.217.155.53:8080/sappbox";
+      return url;
     } else {
       //return "https://www.freechat.cloud/sapp";
       return FChatApiSdk.host+"sapp";
