@@ -24,8 +24,8 @@ class Webpaypage extends StatefulWidget {
   CardObj? cardobj;
   Widget? order;
   PayHtmlObj? pobj;
-
-  Webpaypage({super.key, required this.cardobj, this.order, this.pobj});
+  bool? isLive=false;
+  Webpaypage({super.key, required this.cardobj, this.order, this.pobj,this.isLive});
 
   @override
   _WebhookPaymentScreenState createState() => _WebhookPaymentScreenState();
@@ -49,6 +49,7 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    if(widget.isLive==null) widget.isLive=false;
     email = CookieStorage.getCookie("email");
     email ??= "";
     if (widget.order == null) {
@@ -59,19 +60,6 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
         width: 1,
       );
     }
-    /*  if (widget.cardobj == null) {
-      String? cardinfo = CookieStorage.getCookie("fchat.card");
-      if (cardinfo != null) {
-        //PhoneUtil.applog("读取到本地cookie 数据$cardinfo");
-        widget.cardobj = CardObj.decryptCard(cardinfo);
-        cardnumber = widget.cardobj!.maskCardNumber();
-      } else {
-
-        widget.cardobj = CardObj();
-        widget.cardobj!.cardHolderName=widget.pobj!.fChatAddress!.consumer;
-        PhoneUtil.applog("初始化赋予银行卡客户名称${widget.cardobj!.cardHolderName}");
-      }
-    }*/
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       String stripekey = await WebPayUtil.readstripekey();
       Stripe.publishableKey = stripekey;
@@ -175,69 +163,6 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
 
   InputCard inputCard = InputCard();
 
-  Widget old_getCardInput(void Function(InputCard value) callCard) {
-    return Container(
-      width: width,
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      child: CreditCardForm(
-        formKey: formKey,
-        obscureCvv: true,
-        obscureNumber: false,
-        cardNumber: _getcardnum(),
-        cvvCode: widget.cardobj?.cvvCode ?? "",
-        isHolderNameVisible: true,
-        isCardNumberVisible: true,
-        isExpiryDateVisible: true,
-        cardHolderName: widget.cardobj?.cardHolderName ??
-            widget.pobj!.fChatAddress!.consumer,
-        expiryDate: widget.cardobj?.expiryDate ?? "",
-        onFormComplete: () {
-          inputCard.state = true;
-          callCard(inputCard);
-
-        },
-        inputConfiguration: InputConfiguration(
-          cardNumberDecoration: InputDecoration(
-            labelText: 'Card Numer',
-            hintText: _getHetext(),
-            labelStyle: TextStyle(fontSize: fontsize, color: Colors.white),
-            hintStyle: TextStyle(fontSize: fontsize, color: Colors.white),
-            contentPadding: EdgeInsets.symmetric(vertical: 10),
-            suffixIconConstraints: BoxConstraints(minWidth: 70),
-            suffix: Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: cardarr(),
-              ),
-            ),
-          ),
-          expiryDateDecoration: InputDecoration(
-            labelText: 'Expired Date',
-            hintText: 'XX/XX',
-            labelStyle: TextStyle(fontSize: fontsize, color: Colors.white),
-            hintStyle: TextStyle(fontSize: fontsize, color: Colors.white),
-          ),
-          cvvCodeDecoration: InputDecoration(
-            labelText: 'CVV',
-            hintText: 'XXX',
-            labelStyle: TextStyle(fontSize: fontsize, color: Colors.white),
-            hintStyle: TextStyle(fontSize: fontsize, color: Colors.white),
-          ),
-          cardHolderDecoration: InputDecoration(
-            labelText: 'Card Holder',
-            labelStyle: TextStyle(fontSize: fontsize, color: Colors.white),
-            hintStyle: TextStyle(fontSize: fontsize, color: Colors.white),
-          ),
-        ),
-        onCreditCardModelChange: (CreditCardModel creditCardModel) {
-          //inputCard=InputCard(creditCardModel, false);
-
-          callCard(inputCard);
-        },
-      ),
-    );
-  }
 
   bool iscard = false;
   bool isaba = false;
@@ -305,8 +230,8 @@ class _WebhookPaymentScreenState extends State<Webpaypage> {
                     PhoneUtil.applog("保存cookIE email:$email");
                   },
                 ),
-                widget.order!,
-                const SizedBox(height: 10), // 确保支付按钮有足够空间
+                if(!widget.isLive!)widget.order!,
+                if(!widget.isLive!)const SizedBox(height: 10), // 确保支付按钮有足够空间
                 Align(
                   alignment: Alignment.center,
                   child: Container(

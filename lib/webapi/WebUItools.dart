@@ -16,7 +16,7 @@ import 'StripeUtil/WebPayPage.dart';
 import 'package:universal_html/html.dart' as html;
 class WebUItools{
 
-  static openWebpay(BuildContext context,Widget? order,PayHtmlObj? pobj) async {
+  static openWebpay(BuildContext context,Widget? order,PayHtmlObj? pobj,{islive=false}) async {
     //打开插件支付
     if(FChatApiSdk.isFchatBrower && pobj!=null){
       PayObj fchatpay=PayObj();
@@ -39,7 +39,7 @@ class WebUItools{
         context,
         MaterialPageRoute(
           builder: (context) {
-            return Webpaypage(cardobj: null, order: order, pobj: pobj);
+            return Webpaypage(cardobj: null, order: order, pobj: pobj,isLive: islive);
           },
         ),
       );

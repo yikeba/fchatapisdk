@@ -197,7 +197,7 @@ class FileObj {
       if (response.statusCode == 200) {
         String rec = JsonUtil.getbase64(response.data);
         upstate(rec);
-        print(" writeData 文件上传成功: $rec");
+        //print(" writeData 文件上传成功: $rec");
       } else {
         print("文件上传失败: ${response.statusCode}");
       }
@@ -249,7 +249,7 @@ class FileObj {
         String rec = JsonUtil.getbase64(response.data);
         Map recmap=JsonUtil.strtoMap(rec);
         String url="";
-        PhoneUtil.applog("file 文件上传成功: $rec");
+        PhoneUtil.applog("writeFile file 文件上传成功: $rec");
         if(recmap.containsKey(filename)){
           String md5=recmap[filename];
           url="https://fchatmenchat.s3.ap-southeast-1.amazonaws.com/"+UserObj.userid+"/"+filemd.name+"/"+md5;

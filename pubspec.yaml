@@ -19,7 +19,7 @@ dependencies:
   chewie: 1.7.0
   http_client: ^1.5.2
   http_parser: ^4.0.1
-  dio: ^5.4.0
+  dio: ^5.8.0
   intl: ^0.20.2
   quickalert: ^1.0.1   #弹出框
   url_launcher: ^6.1.11
